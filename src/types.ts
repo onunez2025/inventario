@@ -52,3 +52,11 @@ export interface ConciliacionRecord {
   ultima_observacion?: string;
   ultima_foto?: string;
 }
+
+export interface StockSistemaSesion {
+  id: string;
+  inventario_id: string;
+  sku: string;
+  stock_sistema: number;
+  created_at: string;
+}
