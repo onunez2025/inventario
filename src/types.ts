@@ -44,6 +44,8 @@ export interface ConciliacionRecord {
   articulo_id: string;
   sku: string;
   articulo_nombre: string;
+  categoria?: string;
+  marca?: string;
   costo_unitario: number;
   stock_sistema: number;
   cantidad_fisica: number;

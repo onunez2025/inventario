@@ -34,6 +34,7 @@ import { InventoryHeader } from './components/InventoryHeader';
 import { SystemStockTable } from './components/SystemStockTable';
 import { PhysicalCountsTable } from './components/PhysicalCountsTable';
 import { InventorySelector } from './components/InventorySelector';
+import DashboardIndicators from './components/DashboardIndicators';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -303,25 +304,9 @@ const App: React.FC = () => {
                 {(activeTab === 'summary' || perfil?.rol === 'operario') && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {/* Solo Supervisores/Admins ven KPIs Financieros */}
+                    {/* Indicadores de Dashboard (Solo para Supervisores/Admins) */}
                     {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
-                      <section className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-500">
-                        <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <TrendingDown className="text-red-500" size={48} />
-                          </div>
-                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pérdida Valorizada</p>
-                          <h2 className="text-2xl font-display font-bold text-red-600">S/. {Math.abs(totalPerdida).toLocaleString()}</h2>
-                          <div className="h-1 w-12 bg-red-100 rounded-full mt-2"></div>
-                        </div>
-                        <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
-                          <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <AlertTriangle className="text-amber-500" size={48} />
-                          </div>
-                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Descuadres Críticos</p>
-                          <h2 className="text-2xl font-display font-bold text-gray-800">{descuadresCriticos}</h2>
-                          <div className="h-1 w-12 bg-amber-100 rounded-full mt-2"></div>
-                        </div>
-                      </section>
+                      <DashboardIndicators data={data} tiendaNombre={activeInventory?.tienda_nombre} />
                     )}
 
                 {/* Progress Card */}
@@ -348,26 +333,7 @@ const App: React.FC = () => {
                   <p className="mt-3 text-[10px] uppercase font-bold text-blue-200 tracking-widest">{progreso.completados} de {progreso.total} productos auditados</p>
                 </section>
 
-                {/* Solo Supervisores/Admins ven Gráfico */}
-                {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && data.length > 0 && (
-                  <section className="card h-64 animate-in fade-in duration-700">
-                    <h3 className="mb-4 text-sm uppercase tracking-wider text-on-surface/50">Diferencias por Producto</h3>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={data.filter(d => d.diferencia_unidades !== 0).slice(0, 8)}>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                        <XAxis dataKey="sku" hide />
-                        <Tooltip 
-                          contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', background: '#fff' }}
-                        />
-                        <Bar dataKey="diferencia_valorizada" radius={[4, 4, 0, 0]}>
-                          {data.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.diferencia_valorizada < 0 ? '#dc2626' : '#059669'} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </section>
-                )}
+
 
                 {/* List of Recent counts */}
                 <section className="space-y-4">
