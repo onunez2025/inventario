@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Articulo } from '../types';
-import { Camera, AlertCircle, Save, X, Info } from 'lucide-react';
+import type { Articulo } from '../types';
+import { Camera, AlertCircle, Save, X, Info, Calculator } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface VerificationModalProps {
@@ -25,7 +25,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ articulo, 
     if (foto) {
       const fileExt = foto.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const { data, error: uploadError } = await supabase.storage
+      const { data } = await supabase.storage
         .from('evidencias')
         .upload(fileName, foto);
       

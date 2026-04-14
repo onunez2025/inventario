@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import { Articulo, ConciliacionRecord } from './types';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Camera, Package, AlertTriangle, Users, TrendingDown, ClipboardList } from 'lucide-react';
+import type { Articulo, ConciliacionRecord } from './types';
+import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Camera, Package, AlertTriangle, Users, TrendingDown } from 'lucide-react';
 import { ScannerComponent } from './components/ScannerComponent';
 import { VerificationModal } from './components/VerificationModal';
 import { ItemMaster } from './components/ItemMaster';
 
 const App: React.FC = () => {
   const [data, setData] = useState<ConciliacionRecord[]>([]);
-  const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'status' | 'master'>('status');
   const [showScanner, setShowScanner] = useState(false);
   const [selectedArticulo, setSelectedArticulo] = useState<Articulo | null>(null);
