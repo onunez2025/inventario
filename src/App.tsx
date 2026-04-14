@@ -141,7 +141,7 @@ const App: React.FC = () => {
     await supabase.auth.signOut();
   };
 
-  const handleScan = async (sku: string) => {
+  const handleScan = async (sku: string, mode: 'standard' | 'barrido' = 'standard') => {
     const { data: articulos, error } = await supabase
       .from('articulos')
       .select('*')
@@ -149,8 +149,28 @@ const App: React.FC = () => {
       .maybeSingle();
 
     if (articulos && !error) {
-       setSelectedArticulo(articulos);
-       setShowScanner(false);
+       if (mode === 'barrido') {
+         // Registro automático
+         if (!activeInventory) return;
+         
+         const { error: insertError } = await supabase.from('conteos').insert({
+           articulo_id: articulos.id,
+           cantidad_fisica: 1,
+           inventario_id: activeInventory.id,
+           usuario_id: session?.user.id,
+           observacion: 'Registro por barrido (1x1)'
+         });
+
+         if (insertError) {
+           console.error('Error in barrido insert:', insertError);
+         } else {
+           // Actualizar datos locales para ver el progreso
+           fetchData();
+         }
+       } else {
+         setSelectedArticulo(articulos);
+         setShowScanner(false);
+       }
     } else {
        // Si no existe, pedir autorización de supervisor
        setTempSku(sku.trim());
