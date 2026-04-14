@@ -30,7 +30,9 @@ import { ItemModal } from './components/ItemModal';
 import { ProfileModal } from './components/ProfileModal';
 import { UserManagement } from './components/UserManagement';
 import { InventorySessions } from './components/InventorySessions';
-import { StockManager } from './components/StockManager';
+import { InventoryHeader } from './components/InventoryHeader';
+import { SystemStockTable } from './components/SystemStockTable';
+import { PhysicalCountsTable } from './components/PhysicalCountsTable';
 import { InventorySelector } from './components/InventorySelector';
 
 const App: React.FC = () => {
@@ -49,6 +51,7 @@ const App: React.FC = () => {
   const [showSupervisorAuth, setShowSupervisorAuth] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [tempSku, setTempSku] = useState('');
+  const [activeTab, setActiveTab] = useState<'summary' | 'system_stock' | 'physical_counts'>('summary');
 
   useEffect(() => {
     // 1. Manejar sesión inicial y cambios
@@ -249,37 +252,72 @@ const App: React.FC = () => {
               <InventorySelector onSelect={handleSelectInventory} />
             ) : (
               <>
-                {/* Solo Supervisores/Admins ven KPIs Financieros */}
+                <InventoryHeader 
+                  activeInventory={activeInventory} 
+                  onChangeInventory={() => setActiveInventory(null)} 
+                />
+
                 {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
-                  <section className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-500">
-                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <TrendingDown className="text-red-500" size={48} />
-                      </div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pérdida Valorizada</p>
-                      <h2 className="text-2xl font-display font-bold text-red-600">S/. {Math.abs(totalPerdida).toLocaleString()}</h2>
-                      <div className="h-1 w-12 bg-red-100 rounded-full mt-2"></div>
-                    </div>
-                    <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
-                      <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <AlertTriangle className="text-amber-500" size={48} />
-                      </div>
-                      <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Descuadres Críticos</p>
-                      <h2 className="text-2xl font-display font-bold text-gray-800">{descuadresCriticos}</h2>
-                      <div className="h-1 w-12 bg-amber-100 rounded-full mt-2"></div>
-                    </div>
-                  </section>
+                  <div className="flex bg-gray-100 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
+                    <button 
+                      onClick={() => setActiveTab('summary')}
+                      className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'summary' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                      Resumen Cruce
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab('system_stock')}
+                      className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'system_stock' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                      Stock Sistema
+                    </button>
+                    <button 
+                      onClick={() => setActiveTab('physical_counts')}
+                      className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'physical_counts' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    >
+                      Conteos Detalle
+                    </button>
+                  </div>
                 )}
 
-            {/* Gestión de Stock Sistema (Solo Supervisors/Admins) */}
-            {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && activeInventory && (
-              <section className="animate-in slide-in-from-top-6 duration-700 delay-100">
-                <StockManager 
-                  inventarioId={activeInventory.id} 
-                  onUpdate={fetchData} 
-                />
-              </section>
-            )}
+                {/* Tab: Stock de Sistema */}
+                {activeTab === 'system_stock' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                     <SystemStockTable inventarioId={activeInventory.id} onUpdate={fetchData} />
+                  </div>
+                )}
+
+                {/* Tab: Historial Detallado de Conteos */}
+                {activeTab === 'physical_counts' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+                  <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+                     <PhysicalCountsTable inventarioId={activeInventory.id} />
+                  </div>
+                )}
+
+                {/* Tab: Resumen de Cruce (y vista de Operario) */}
+                {(activeTab === 'summary' || perfil?.rol === 'operario') && (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    {/* Solo Supervisores/Admins ven KPIs Financieros */}
+                    {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+                      <section className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-500">
+                        <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <TrendingDown className="text-red-500" size={48} />
+                          </div>
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pérdida Valorizada</p>
+                          <h2 className="text-2xl font-display font-bold text-red-600">S/. {Math.abs(totalPerdida).toLocaleString()}</h2>
+                          <div className="h-1 w-12 bg-red-100 rounded-full mt-2"></div>
+                        </div>
+                        <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
+                          <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <AlertTriangle className="text-amber-500" size={48} />
+                          </div>
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Descuadres Críticos</p>
+                          <h2 className="text-2xl font-display font-bold text-gray-800">{descuadresCriticos}</h2>
+                          <div className="h-1 w-12 bg-amber-100 rounded-full mt-2"></div>
+                        </div>
+                      </section>
+                    )}
 
                 {/* Progress Card */}
                 <section className="bg-primary p-6 rounded-[2rem] text-white shadow-xl shadow-primary/20 relative overflow-hidden">
@@ -369,8 +407,10 @@ const App: React.FC = () => {
                       ))}
                   </div>
                 </section>
-              </>
+              </div>
             )}
+            </>
+          )}
           </main>
         </>
       )}
