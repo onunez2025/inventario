@@ -1,9 +1,12 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.mtindustrial.inventory',
-  appName: 'InventoryPremium',
-  webDir: 'dist'
+  appId: 'com.mtindustrial.inventia',
+  appName: 'Invent-IA',
+  webDir: 'dist',
+  server: {
+    androidScheme: 'https'
+  }
 };
 
 export default config;
