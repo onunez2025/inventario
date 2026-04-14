@@ -41,16 +41,21 @@ const App: React.FC = () => {
   }, []);
 
   const fetchPerfil = async (userId: string) => {
-    const { data, error } = await supabase
-      .from('perfiles')
-      .select('*')
-      .eq('id', userId)
-      .single();
-    
-    if (data && !error) {
-      setPerfil(data);
-      // Si el usuario es operario, forzar vista status (no tiene acceso a master)
-      if (data.rol === 'operario') setView('status');
+    try {
+      const { data, error } = await supabase
+        .from('perfiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (data && !error) {
+        setPerfil(data);
+        if (data.rol === 'operario') setView('status');
+      }
+    } catch (err) {
+      console.error('Error loading profile:', err);
+    } finally {
+      setLoading(false);
     }
   };
 

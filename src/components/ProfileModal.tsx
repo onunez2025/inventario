@@ -30,7 +30,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ perfil, session, onC
               <User size={48} className="text-white" />
             </div>
             <h2 className="text-2xl font-display font-black tracking-tight">{userName}</h2>
-            <div className="mt-2 inline-flex items-center gap-1 bg-secondary px-3 py-1 rounded-full border border-white/20">
+            <div className={`mt-2 inline-flex items-center gap-1 px-3 py-1 rounded-full border border-white/20 ${userRole === 'administrador' ? 'bg-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.5)]' : 'bg-secondary'}`}>
               <Shield size={12} className="text-white" />
               <span className="text-[10px] uppercase font-bold tracking-widest text-white">{userRole}</span>
             </div>
