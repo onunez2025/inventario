@@ -26,7 +26,8 @@ export const SystemStockTable: React.FC<SystemStockTableProps> = ({ inventarioId
         articulos ( nombre )
       `)
       .eq('inventario_id', inventarioId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(10000);
 
     if (!error && data) {
       setStockRecords(data);

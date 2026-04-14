@@ -34,7 +34,8 @@ export const PhysicalCountsTable: React.FC<PhysicalCountsTableProps> = ({ invent
         perfiles ( nombre )
       `)
       .eq('inventario_id', inventarioId)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(10000);
 
     if (!error && data) {
       setCounts(data);

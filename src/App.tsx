@@ -121,7 +121,8 @@ const App: React.FC = () => {
     const { data: records, error } = await supabase
       .from('vista_conciliacion')
       .select('*')
-      .eq('inventario_id', activeInventory.id);
+      .eq('inventario_id', activeInventory.id)
+      .limit(10000); // Fetch up to 10k records to avoid default 1000 limit truncating counts
 
     if (error) console.error('Error fetching data:', error);
     else setData(records || []);
