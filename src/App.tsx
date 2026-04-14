@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import type { Articulo, ConciliacionRecord, Perfil } from './types';
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Camera, Package, AlertTriangle, TrendingDown, LogOut, User, Database } from 'lucide-react';
+import { Camera, Package, AlertTriangle, TrendingDown, LogOut, User, Database, Users } from 'lucide-react';
 import { ScannerComponent } from './components/ScannerComponent';
 import { VerificationModal } from './components/VerificationModal';
 import { ItemMaster } from './components/ItemMaster';
@@ -10,13 +10,14 @@ import { LoginPage } from './components/LoginPage';
 import SupervisorAuthModal from './components/SupervisorAuthModal';
 import { ItemModal } from './components/ItemModal';
 import { ProfileModal } from './components/ProfileModal';
+import { UserManagement } from './components/UserManagement';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [data, setData] = useState<ConciliacionRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'status' | 'master'>('status');
+  const [view, setView] = useState<'status' | 'master' | 'users'>('status');
   const [showScanner, setShowScanner] = useState(false);
   const [selectedArticulo, setSelectedArticulo] = useState<Articulo | null>(null);
   const [showItemModal, setShowItemModal] = useState(false);
@@ -125,6 +126,22 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-surface flex flex-col">
       {(view === 'master' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador')) ? (
         <ItemMaster onBack={() => setView('status')} />
+      ) : view === 'users' && (perfil?.rol === 'administrador') ? (
+        <div className="flex-1 flex flex-col bg-slate-950">
+           {/* Header duplicado para vista master/users para consistencia */}
+           <header className="bg-slate-900/50 backdrop-blur-md p-4 text-white border-b border-white/5 sticky top-0 z-20">
+              <div className="max-w-4xl mx-auto flex justify-between items-center">
+                <button onClick={() => setView('status')} className="text-sm font-bold text-primary flex items-center gap-2">
+                  ← Volver
+                </button>
+                <h1 className="text-xl font-display font-black tracking-tight">Administración</h1>
+                <div className="w-16"></div>
+              </div>
+           </header>
+           <div className="flex-1 overflow-auto">
+              <UserManagement />
+           </div>
+        </div>
       ) : (
         <>
           {/* Header */}
@@ -296,23 +313,16 @@ const App: React.FC = () => {
               <span className="text-[9px] uppercase mt-1">Maestro</span>
             </button>
             <button 
-              onClick={() => alert('Gestión de Usuarios - Próximamente')}
-              className={`flex flex-col items-center flex-1 transition-all text-gray-400 opacity-50`}
+              onClick={() => setView('users')}
+              className={`flex flex-col items-center flex-1 transition-all ${view === 'users' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
             >
-              <User size={22} className="text-gray-400" />
+              <Users size={22} />
               <span className="text-[9px] uppercase mt-1">Usuarios</span>
             </button>
           </>
         )}
 
-        {/* Botón de Perfil en Nav para Mobile */}
-        <button 
-          onClick={() => setShowProfile(true)}
-          className={`flex flex-col items-center flex-1 transition-all text-gray-400`}
-        >
-          <User size={22} />
-          <span className="text-[9px] uppercase mt-1">Perfil</span>
-        </button>
+        {/* Botón de Perfil en Nav para Mobile - ELIMINADO SEGÚN SOLICITUD */}
         </nav>
       )}
 

@@ -69,7 +69,7 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
     <div className="fixed inset-0 bg-black/95 z-[200] flex flex-col items-center justify-center p-6 text-white text-center animate-in fade-in duration-300">
       {/* Scanner Wrapper */}
       <div className="relative w-full max-w-sm aspect-square bg-white/5 rounded-[40px] border-2 border-white/20 overflow-hidden shadow-2xl shadow-primary/10">
-        <div id="reader" className="w-full h-full object-cover" />
+        <div id="reader" className="w-full h-full flex items-center justify-center bg-black overflow-hidden [&_video]:object-contain" />
         
         {!isScanning && !error && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/50 backdrop-blur-sm">
