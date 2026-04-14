@@ -2,13 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import type { Articulo, ConciliacionRecord, Perfil } from './types';
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Camera, Package, AlertTriangle, TrendingDown, LogOut } from 'lucide-react';
-import { ScannerComponent } from './components/ScannerComponent';
-import { VerificationModal } from './components/VerificationModal';
-import { ItemMaster } from './components/ItemMaster';
-import { LoginPage } from './components/LoginPage';
 import SupervisorAuthModal from './components/SupervisorAuthModal';
 import { ItemModal } from './components/ItemModal';
+import { ProfileModal } from './components/ProfileModal';
+import { Camera, Package, AlertTriangle, TrendingDown, LogOut, User, Database } from 'lucide-react';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -20,6 +17,7 @@ const App: React.FC = () => {
   const [selectedArticulo, setSelectedArticulo] = useState<Articulo | null>(null);
   const [showItemModal, setShowItemModal] = useState(false);
   const [showSupervisorAuth, setShowSupervisorAuth] = useState(false);
+  const [showProfile, setShowProfile] = useState(false);
   const [tempSku, setTempSku] = useState('');
 
   useEffect(() => {
@@ -121,20 +119,28 @@ const App: React.FC = () => {
       ) : (
         <>
           {/* Header */}
-          <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-10">
+          <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-10 transition-all">
             <div className="max-w-4xl mx-auto flex justify-between items-center">
               <h1 className="text-2xl font-display font-black tracking-tighter text-white">Invent<span className="text-secondary">-IA</span></h1>
               <div className="flex items-center gap-3">
-                <div className="text-right hidden sm:block">
-                  <p className="text-[10px] uppercase font-bold text-primary-fixed/50 leading-none">{perfil?.rol}</p>
-                  <p className="text-xs font-bold">{perfil?.nombre || perfil?.email}</p>
-                </div>
+                <button 
+                  onClick={() => setShowProfile(true)}
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition-all px-3 py-1.5 rounded-2xl active:scale-95 border border-white/5"
+                >
+                  <div className="text-right">
+                    <p className="text-[10px] uppercase font-bold text-blue-200 leading-none tracking-widest">{perfil?.rol}</p>
+                    <p className="text-xs font-bold text-white">{perfil?.nombre?.split(' ')[0] || 'Mi Cuenta'}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-secondary rounded-xl flex items-center justify-center shadow-lg">
+                    <User size={16} className="text-white" />
+                  </div>
+                </button>
                 <button 
                   onClick={handleLogout}
-                  className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center hover:bg-red-500 transition-colors group"
+                  className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-red-500/80 transition-all group border border-white/5"
                   title="Cerrar Sesión"
                 >
-                  <LogOut size={20} className="group-hover:scale-110 transition-transform" />
+                  <LogOut size={18} className="group-hover:scale-110 transition-transform" />
                 </button>
               </div>
             </div>
@@ -253,32 +259,41 @@ const App: React.FC = () => {
       )}
 
       {/* Floating Bottom Nav for Mobile - Persistent */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-outline-variant/30 px-6 py-4 pb-8 flex justify-between items-center z-20">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-outline-variant/30 px-4 py-3 pb-8 flex justify-between items-center z-[140]">
         <button 
           onClick={() => setView('status')}
-          className={`flex flex-col items-center flex-1 transition-all ${view === 'status' ? 'text-primary scale-110' : 'text-on-surface/30'}`}
+          className={`flex flex-col items-center flex-1 transition-all ${view === 'status' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
         >
-          <TrendingDown size={24} />
-          <span className="text-[10px] uppercase mt-1 font-bold">Status</span>
+          <TrendingDown size={22} />
+          <span className="text-[9px] uppercase mt-1">Status</span>
         </button>
         
         <button 
           onClick={() => setShowScanner(true)}
-          className="bg-primary p-4 rounded-full -mt-14 shadow-xl border-[6px] border-surface text-white active:scale-90 transition-all hover:bg-primary-container"
+          className="bg-primary p-4 rounded-[1.5rem] -mt-12 shadow-2xl shadow-primary/40 border-[6px] border-white text-white active:scale-90 transition-all hover:bg-primary-container z-10"
         >
-          <Camera size={28} />
+          <Camera size={26} />
         </button>
         
         {/* Solo Supervisores ven el Maestro */}
         {perfil?.rol === 'supervisor' && (
           <button 
             onClick={() => setView('master')}
-            className={`flex flex-col items-center flex-1 transition-all ${view === 'master' ? 'text-primary scale-110' : 'text-on-surface/30'}`}
+            className={`flex flex-col items-center flex-1 transition-all ${view === 'master' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
           >
-            <Package size={24} />
-            <span className="text-[10px] uppercase mt-1 font-bold">Master</span>
+            <Database size={22} />
+            <span className="text-[9px] uppercase mt-1">Maestro</span>
           </button>
         )}
+
+        {/* Botón de Perfil en Nav para Mobile */}
+        <button 
+          onClick={() => setShowProfile(true)}
+          className={`flex flex-col items-center flex-1 transition-all text-gray-400`}
+        >
+          <User size={22} />
+          <span className="text-[9px] uppercase mt-1">Perfil</span>
+        </button>
       </nav>
 
       {/* Modals */}
@@ -313,6 +328,14 @@ const App: React.FC = () => {
           sku={tempSku}
           onClose={() => setShowSupervisorAuth(false)}
           onSuccess={handleSupervisorSuccess}
+        />
+      )}
+
+      {showProfile && (
+        <ProfileModal
+          perfil={perfil}
+          onClose={() => setShowProfile(false)}
+          onLogout={handleLogout}
         />
       )}
 
