@@ -16,6 +16,8 @@ import {
   Key
 } from 'lucide-react';
 import type { Perfil, UserRole } from '../types';
+import { RolePermissions } from './RolePermissions';
+
 
 export const UserManagement: React.FC = () => {
   const [perfiles, setPerfiles] = useState<Perfil[]>([]);
@@ -289,27 +291,9 @@ export const UserManagement: React.FC = () => {
         )}
       </div>
 
-      {/* RBAC Info */}
-      <div className="bg-white border border-gray-100 rounded-[32px] p-8 space-y-4 shadow-sm">
-        <div className="flex items-center gap-3 mb-2">
-          <Lock size={18} className="text-primary" />
-          <h4 className="text-sm font-black uppercase tracking-widest text-gray-800">Niveles de Acceso (RBAC)</h4>
-        </div>
-        <div className="grid sm:grid-cols-3 gap-6 border-t border-gray-50 pt-4">
-          <div className="space-y-1 border-l-2 border-amber-500 pl-4">
-            <p className="text-amber-600 text-[10px] font-black uppercase tracking-widest">Administrador</p>
-            <p className="text-xs text-gray-500 leading-relaxed">Acceso total, gestión de usuarios, auditoría y KPIs financieros.</p>
-          </div>
-          <div className="space-y-1 border-l-2 border-primary pl-4">
-            <p className="text-primary text-[10px] font-black uppercase tracking-widest">Supervisor</p>
-            <p className="text-xs text-gray-500 leading-relaxed">Gestión de artículos, visualización de KPIs y auditoría de stock.</p>
-          </div>
-          <div className="space-y-1 border-l-2 border-gray-200 pl-4">
-            <p className="text-gray-400 text-[10px] font-black uppercase tracking-widest">Operario</p>
-            <p className="text-xs text-gray-500 leading-relaxed">Acceso limitado solo a la toma de física (escaneo y conteo).</p>
-          </div>
-        </div>
-      </div>
+      {/* Matriz de Permisos (RBAC) */}
+      <RolePermissions />
+
 
       {/* Modal for Creating User */}
       {isAddModalOpen && (

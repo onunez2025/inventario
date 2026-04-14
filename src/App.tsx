@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import type { Articulo, ConciliacionRecord, Perfil, Inventario } from './types';
+import type { Articulo, ConciliacionRecord, Perfil, Inventario, PermissionKey } from './types';
+import { rbacService } from './services/rbacService';
+
 
 import { 
   Camera, 
@@ -32,6 +34,8 @@ const App: React.FC = () => {
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [data, setData] = useState<ConciliacionRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [permisos, setPermisos] = useState<PermissionKey[]>([]);
+
   const [view, setView] = useState<'status' | 'master' | 'users' | 'inventory'>('status');
   const [activeInventory, setActiveInventory] = useState<Inventario | null>(() => {
     const saved = localStorage.getItem('activeInventory');
@@ -71,7 +75,13 @@ const App: React.FC = () => {
       
       if (data && !error) {
         setPerfil(data);
-        if (data.rol === 'operario') setView('status');
+        
+        // Cargar permisos del rol
+        const perms = await rbacService.getPermissionsByRole(data.rol);
+        setPermisos(perms);
+
+        if (data.rol === 'operario' && !perms.includes('view_master')) setView('status');
+
 
         // Auto-seleccionar inventario si no hay uno activo guardado
         const savedInv = localStorage.getItem('activeInventory');
@@ -165,6 +175,9 @@ const App: React.FC = () => {
   if (!session) return <LoginPage />;
   if (!perfil && loading) return <div className="min-h-screen flex items-center justify-center bg-surface"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 
+  const hasPermission = (key: PermissionKey) => permisos.includes(key);
+
+
 
   const progreso = {
     total: activeInventory ? (data.length || 0) : 0,
@@ -173,9 +186,10 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
-      {(view === 'master' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador')) ? (
+      {(view === 'master' && hasPermission('view_master')) ? (
         <ItemMaster onBack={() => setView('status')} />
-      ) : view === 'inventory' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') ? (
+      ) : view === 'inventory' && hasPermission('view_inventory_sessions') ? (
+
         <div className="flex-1 flex flex-col bg-surface">
            <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-20">
               <div className="max-w-4xl mx-auto flex justify-between items-center">
@@ -193,7 +207,8 @@ const App: React.FC = () => {
               />
            </div>
         </div>
-      ) : view === 'users' && (perfil?.rol === 'administrador') ? (
+      ) : view === 'users' && hasPermission('view_users') ? (
+
         <div className="flex-1 flex flex-col bg-surface">
            {/* Header duplicado para vista master/users para consistencia */}
            <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-20">
@@ -253,7 +268,8 @@ const App: React.FC = () => {
                   onChangeInventory={() => setActiveInventory(null)} 
                 />
 
-                {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+                {(hasPermission('view_master') || hasPermission('view_inventory_sessions')) && (
+
                   <div className="flex bg-gray-100 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
                     <button 
                       onClick={() => setActiveTab('summary')}
@@ -277,14 +293,16 @@ const App: React.FC = () => {
                 )}
 
                 {/* Tab: Stock de Sistema */}
-                {activeTab === 'system_stock' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+                {activeTab === 'system_stock' && hasPermission('view_master') && (
+
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                      <SystemStockTable inventarioId={activeInventory.id} onUpdate={fetchData} />
                   </div>
                 )}
 
                 {/* Tab: Historial Detallado de Conteos */}
-                {activeTab === 'physical_counts' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+                {activeTab === 'physical_counts' && hasPermission('view_inventory_sessions') && (
+
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                      <PhysicalCountsTable inventarioId={activeInventory.id} />
                   </div>
@@ -295,7 +313,8 @@ const App: React.FC = () => {
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                     {/* Solo Supervisores/Admins ven KPIs Financieros */}
                     {/* Indicadores de Dashboard (Solo para Supervisores/Admins) */}
-                    {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+                    {hasPermission('view_dashboard') && (
+
                       <DashboardIndicators data={data} tiendaNombre={activeInventory?.tienda_nombre} />
                     )}
 
@@ -389,7 +408,8 @@ const App: React.FC = () => {
               <span className="text-[10px] uppercase mt-1.5 tracking-tighter">Status</span>
             </button>
             
-            {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+            {hasPermission('view_master') && (
+
               <button 
                 onClick={() => setView('master')}
                 className={`flex flex-col items-center flex-1 transition-all ${view === 'master' ? 'text-primary scale-110 font-black' : 'text-gray-400 font-medium'}`}
@@ -413,7 +433,8 @@ const App: React.FC = () => {
 
           {/* Lado Derecho: Gestión y Configuración */}
           <div className="flex-1 flex justify-around items-center pb-2 px-2">
-            {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+            {hasPermission('view_inventory_sessions') && (
+
               <button 
                 onClick={() => setView('inventory')}
                 className={`flex flex-col items-center flex-1 transition-all ${view === 'inventory' ? 'text-primary scale-110 font-black' : 'text-gray-400 font-medium'}`}
@@ -423,7 +444,8 @@ const App: React.FC = () => {
               </button>
             )}
 
-            {perfil?.rol === 'administrador' ? (
+            {hasPermission('view_users') ? (
+
               <button 
                 onClick={() => setView('users')}
                 className={`flex flex-col items-center flex-1 transition-all ${view === 'users' ? 'text-primary scale-110 font-black' : 'text-gray-400 font-medium'}`}

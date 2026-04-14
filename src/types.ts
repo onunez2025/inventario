@@ -62,3 +62,23 @@ export interface StockSistemaSesion {
   stock_sistema: number;
   created_at: string;
 }
+export interface RolPermiso {
+  id: string;
+  rol: string;
+  permiso: string;
+}
+
+export type PermissionKey = 
+  | 'view_dashboard' 
+  | 'view_master' 
+  | 'view_users' 
+  | 'view_inventory_sessions' 
+  | 'edit_master' 
+  | 'manage_users' 
+  | 'scan_items';
+
+export interface PermissionDefinition {
+  key: PermissionKey;
+  label: string;
+  description: string;
+}
