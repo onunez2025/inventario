@@ -15,8 +15,10 @@ const App: React.FC = () => {
   const [selectedArticulo, setSelectedArticulo] = useState<Articulo | null>(null);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    if (view === 'status') {
+      fetchData();
+    }
+  }, [view]);
 
   const fetchData = async () => {
     setLoading(true);
