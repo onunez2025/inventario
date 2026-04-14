@@ -197,46 +197,64 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
         </div>
 
         {/* Widget: Resumen por Local */}
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-6 space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Local</h3>
-            <MapPin size={18} className="text-primary opacity-20" />
+            <div className="w-8 h-8 rounded-2xl bg-primary/5 flex items-center justify-center">
+              <MapPin size={16} className="text-primary opacity-60" />
+            </div>
           </div>
-          <div className="overflow-x-auto scrollbar-hide">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-50">
-                  <th className="pb-3 text-left text-[10px] uppercase font-black text-gray-400">Local</th>
-                  <th className="pb-3 text-center text-[10px] uppercase font-black text-gray-400">Sistema</th>
-                  <th className="pb-3 text-center text-[10px] uppercase font-black text-gray-400">Inventario</th>
-                  <th className="pb-3 text-center text-[10px] uppercase font-black text-gray-400">Diferencia</th>
-                  <th className="pb-3 text-right text-[10px] uppercase font-black text-gray-400">Val</th>
-                </tr>
-              </thead>
-              <tbody className="text-xs">
-                <tr>
-                  <td className="py-4 font-black text-primary uppercase">{tiendaNombre || 'S/N'}</td>
-                  <td className="py-4 text-center font-mono font-bold text-gray-600">{totals.sistema.toLocaleString()}</td>
-                  <td className="py-4 text-center font-mono font-bold text-gray-600">{totals.inventario.toLocaleString()}</td>
-                  <td className={`py-4 text-center font-mono font-bold ${totals.diferencia < 0 ? 'text-red-500' : 'text-green-600'}`}>{totals.diferencia.toLocaleString()}</td>
-                  <td className={`py-4 text-right font-black ${totals.valor < 0 ? 'text-red-500' : 'text-green-600'}`}>{formatCurrency(totals.valor)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div className="pt-4 border-t border-gray-50 flex justify-between items-center">
-             <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center">
-                   <Package size={14} className="text-primary" />
-                </div>
-                <div>
-                   <p className="text-[10px] font-black text-gray-400 uppercase leading-none">Total Unidades</p>
-                   <p className="text-sm font-black text-gray-800">{totals.inventario.toLocaleString()}</p>
-                </div>
+
+          <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-[2rem] border border-gray-100 group hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all">
+             <div className="w-12 h-12 rounded-2xl bg-white shadow-sm flex items-center justify-center flex-shrink-0 group-hover:bg-primary transition-colors">
+                <Package size={20} className="text-primary group-hover:text-white transition-colors" />
              </div>
-             <div className="text-right">
-                <p className="text-[10px] font-black text-gray-400 uppercase leading-none">Diferencia Total</p>
-                <p className={`text-sm font-black ${totals.valor < 0 ? 'text-red-500' : 'text-green-600'}`}>{formatCurrency(totals.valor)}</p>
+             <div className="min-w-0">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Local Seleccionado</p>
+                <p className="text-sm font-black text-gray-800 uppercase leading-tight truncate">{tiendaNombre || 'S/N'}</p>
+             </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-1">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sistema</p>
+                <p className="text-base font-black text-gray-700 font-mono tracking-tighter">
+                  {totals.sistema.toLocaleString()}
+                  <span className="text-[9px] ml-1 text-gray-300 font-sans uppercase">uds</span>
+                </p>
+             </div>
+             <div className="space-y-1">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Inventario</p>
+                <p className="text-base font-black text-gray-700 font-mono tracking-tighter">
+                  {totals.inventario.toLocaleString()}
+                  <span className="text-[9px] ml-1 text-gray-300 font-sans uppercase">uds</span>
+                </p>
+             </div>
+             <div className="space-y-1">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Diferencia</p>
+                <p className={`text-base font-black font-mono tracking-tighter ${totals.diferencia < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                  {totals.diferencia > 0 ? '+' : ''}{totals.diferencia.toLocaleString()}
+                  <span className="text-[9px] ml-1 opacity-40 font-sans uppercase font-bold text-gray-400">uds</span>
+                </p>
+             </div>
+             <div className="space-y-1 text-right">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Valorización</p>
+                <p className={`text-base font-black tracking-tighter ${totals.valor < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                  {formatCurrency(totals.valor)}
+                </p>
+             </div>
+          </div>
+
+          <div className="pt-4 border-t border-gray-50 flex justify-between items-center opacity-60">
+             <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Datos sincronizados hoy</p>
+             </div>
+             <div className="flex items-center gap-1">
+                <div className={`w-2 h-2 rounded-full ${totals.diferencia === 0 ? 'bg-green-500' : 'bg-orange-500'}`} />
+                <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">
+                  {totals.diferencia === 0 ? 'Cuadrado' : 'Con Diferencias'}
+                </p>
              </div>
           </div>
         </div>

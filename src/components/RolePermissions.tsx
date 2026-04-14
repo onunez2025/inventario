@@ -5,7 +5,10 @@ import {
   Shield, 
   Info, 
   Lock,
-  Unlock
+  Unlock,
+  Users,
+  User,
+  ShieldCheck
 } from 'lucide-react';
 
 interface RolePermissionsProps {
@@ -63,16 +66,27 @@ export const RolePermissions: React.FC<RolePermissionsProps> = ({ canEdit = true
           </div>
         </div>
 
-        <div className="flex bg-white p-1 rounded-2xl border border-gray-100 shadow-sm w-full sm:w-auto">
-          {roles.map(rol => (
-            <button
-              key={rol}
-              onClick={() => setSelectedRole(rol)}
-              className={`flex-1 px-4 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-all ${selectedRole === rol ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
-            >
-              {rol}
-            </button>
-          ))}
+        <div className="flex bg-gray-100/50 p-1 rounded-2xl border border-gray-100 shadow-inner w-full sm:w-auto">
+          {roles.map(rol => {
+            const isActive = selectedRole === rol;
+            return (
+              <button
+                key={rol}
+                onClick={() => setSelectedRole(rol)}
+                className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all group ${
+                  isActive 
+                    ? 'bg-primary text-white shadow-lg shadow-primary/25 scale-[1.02] z-10' 
+                    : 'text-gray-400 hover:text-primary hover:bg-white transition-all'
+                }`}
+              >
+                {rol === 'administrador' && <ShieldCheck size={16} className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-primary'} />}
+                {rol === 'supervisor' && <Users size={16} className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-primary'} />}
+                {rol === 'operario' && <User size={16} className={isActive ? 'text-white' : 'text-gray-400 group-hover:text-primary'} />}
+                <span className="hidden xs:inline">{rol}</span>
+                <span className="xs:hidden">{rol.charAt(0)}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
