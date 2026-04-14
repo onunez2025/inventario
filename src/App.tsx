@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import type { Articulo, ConciliacionRecord, Perfil } from './types';
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Camera, Package, AlertTriangle, Users, TrendingDown, LogOut } from 'lucide-react';
+import { Camera, Package, AlertTriangle, TrendingDown, LogOut } from 'lucide-react';
 import { ScannerComponent } from './components/ScannerComponent';
 import { VerificationModal } from './components/VerificationModal';
 import { ItemMaster } from './components/ItemMaster';
