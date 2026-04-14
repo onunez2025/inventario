@@ -7,6 +7,8 @@ import { ScannerComponent } from './components/ScannerComponent';
 import { VerificationModal } from './components/VerificationModal';
 import { ItemMaster } from './components/ItemMaster';
 import { LoginPage } from './components/LoginPage';
+import SupervisorAuthModal from './components/SupervisorAuthModal';
+import { ItemModal } from './components/ItemModal';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -16,6 +18,9 @@ const App: React.FC = () => {
   const [view, setView] = useState<'status' | 'master'>('status');
   const [showScanner, setShowScanner] = useState(false);
   const [selectedArticulo, setSelectedArticulo] = useState<Articulo | null>(null);
+  const [showItemModal, setShowItemModal] = useState(false);
+  const [showSupervisorAuth, setShowSupervisorAuth] = useState(false);
+  const [tempSku, setTempSku] = useState('');
 
   useEffect(() => {
     // 1. Manejar sesión inicial y cambios
@@ -73,14 +78,29 @@ const App: React.FC = () => {
       .from('articulos')
       .select('*')
       .eq('sku', sku.trim())
-      .single();
+      .maybeSingle();
 
     if (articulos && !error) {
        setSelectedArticulo(articulos);
        setShowScanner(false);
     } else {
-       alert('Producto no encontrado en el maestro');
+       // Si no existe, pedir autorización de supervisor
+       setTempSku(sku.trim());
+       setShowSupervisorAuth(true);
+       setShowScanner(false);
     }
+  };
+
+  const handleSupervisorSuccess = () => {
+    setShowSupervisorAuth(false);
+    setShowItemModal(true); // Abrir formulario de creación
+  };
+
+  const handleItemCreated = () => {
+    setShowItemModal(false);
+    // Una vez creado, podemos proceder a la verificación de stock automáticamente
+    // O simplemente recargar la lista
+    fetchData();
   };
 
   // Redirigir a Login si no hay sesión
@@ -103,7 +123,7 @@ const App: React.FC = () => {
           {/* Header */}
           <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-10">
             <div className="max-w-4xl mx-auto flex justify-between items-center">
-              <h1 className="text-xl font-display uppercase tracking-widest">Inventory Curator</h1>
+              <h1 className="text-2xl font-display font-black tracking-tighter text-white">Invent<span className="text-secondary">-IA</span></h1>
               <div className="flex items-center gap-3">
                 <div className="text-right hidden sm:block">
                   <p className="text-[10px] uppercase font-bold text-primary-fixed/50 leading-none">{perfil?.rol}</p>
@@ -124,34 +144,44 @@ const App: React.FC = () => {
             {/* Solo Supervisores ven KPIs Financieros */}
             {perfil?.rol === 'supervisor' && (
               <section className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-500">
-                <div className="card space-y-1">
-                  <TrendingDown className="text-red-500 mb-2" size={24} />
-                  <p className="text-sm text-on-surface/60">Pérdida Valorizada</p>
-                  <h2 className="text-2xl font-display text-red-600">S/. {Math.abs(totalPerdida).toLocaleString()}</h2>
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <TrendingDown className="text-red-500" size={48} />
+                  </div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Pérdida Valorizada</p>
+                  <h2 className="text-2xl font-display font-bold text-red-600">S/. {Math.abs(totalPerdida).toLocaleString()}</h2>
+                  <div className="h-1 w-12 bg-red-100 rounded-full mt-2"></div>
                 </div>
-                <div className="card space-y-1">
-                  <AlertTriangle className="text-amber-500 mb-2" size={24} />
-                  <p className="text-sm text-on-surface/60">Descuadres Críticos</p>
-                  <h2 className="text-2xl font-display">{descuadresCriticos}</h2>
+                <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <AlertTriangle className="text-amber-500" size={48} />
+                  </div>
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Descuadres Críticos</p>
+                  <h2 className="text-2xl font-display font-bold text-gray-800">{descuadresCriticos}</h2>
+                  <div className="h-1 w-12 bg-amber-100 rounded-full mt-2"></div>
                 </div>
               </section>
             )}
 
             {/* Progress Card */}
-            <section className="card bg-primary-fixed/30 border-primary/10">
-              <div className="flex justify-between items-end mb-4">
+            <section className="bg-primary p-6 rounded-[2rem] text-white shadow-xl shadow-primary/20 relative overflow-hidden">
+              <div className="absolute top-0 right-0 -m-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+              <div className="flex justify-between items-end mb-4 relative z-10">
                 <div>
-                  <h3 className="text-lg">Progreso Toma Física</h3>
-                  <p className="text-sm text-on-surface/60">Tienda: Lima Central</p>
+                  <h3 className="text-lg font-bold">Progreso Toma Física</h3>
+                  <p className="text-xs text-blue-100">Tienda: Lima Central</p>
                 </div>
-                <p className="text-primary font-bold">{Math.round((progreso.completados / progreso.total) * 100)}%</p>
+                <div className="text-right">
+                  <p className="text-3xl font-display font-black">{Math.round((progreso.completados / progreso.total) * 100)}<span className="text-sm ml-1">%</span></p>
+                </div>
               </div>
-              <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+              <div className="w-full bg-white/20 h-3 rounded-full overflow-hidden relative z-10">
                 <div 
-                  className="bg-primary h-full transition-all duration-1000" 
+                  className="bg-secondary h-full transition-all duration-1000 shadow-[0_0_10px_rgba(0,161,222,0.5)]" 
                   style={{ width: `${(progreso.completados / progreso.total) * 100}%` }}
                 />
               </div>
+              <p className="mt-3 text-[10px] uppercase font-bold text-blue-200 tracking-widest">{progreso.completados} de {progreso.total} productos auditados</p>
             </section>
 
             {/* Solo Supervisores ven Gráfico */}
@@ -180,24 +210,37 @@ const App: React.FC = () => {
               <h3 className="text-lg px-2">Actividad de Inventario</h3>
               <div className="space-y-3">
                   {data.filter(d => d.cantidad_fisica > 0).length === 0 ? (
-                    <div className="text-center py-10 opacity-30 border-2 border-dashed border-on-surface/20 rounded-3xl">
-                      <Package size={48} className="mx-auto mb-2" />
-                      <p className="text-sm">No hay registros hoy</p>
+                    <div className="text-center py-16 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
+                      <Package size={48} className="mx-auto mb-3 text-gray-300" />
+                      <p className="text-sm text-gray-400 font-medium">No se han registrado conteos hoy</p>
+                      <button 
+                        onClick={() => setShowScanner(true)}
+                        className="mt-4 text-primary font-bold text-xs uppercase tracking-widest bg-white px-4 py-2 rounded-full shadow-sm"
+                      >
+                        Empezar a Escanear
+                      </button>
                     </div>
                   ) : data.filter(d => d.cantidad_fisica > 0).map(record => (
-                    <div key={record.sku} className="card p-4 flex justify-between items-center group active:scale-95 transition-all cursor-pointer" onClick={() => handleScan(record.sku)}>
+                    <div 
+                      key={record.sku} 
+                      className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center group active:scale-[0.98] transition-all cursor-pointer hover:border-secondary/30" 
+                      onClick={() => handleScan(record.sku)}
+                    >
                       <div className="flex items-center gap-4">
-                        <div className={`p-2 rounded-xl ${record.diferencia_unidades === 0 ? 'bg-secondary/10 text-secondary' : 'bg-red-50 text-red-500'}`}>
-                          <Package size={20} />
+                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${record.diferencia_unidades === 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
+                          <Package size={24} />
                         </div>
-                        <div>
-                          <p className="text-sm font-bold truncate max-w-[150px]">{record.articulo_nombre}</p>
-                          <p className="text-[10px] opacity-40 uppercase font-bold tracking-tighter">{record.sku}</p>
+                        <div className="max-w-[180px]">
+                          <p className="text-sm font-bold text-gray-800 truncate">{record.articulo_nombre}</p>
+                          <p className="text-[10px] text-gray-400 font-mono uppercase tracking-tighter">{record.sku}</p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-display">{record.cantidad_fisica} <span className="text-[10px] opacity-40">uds</span></p>
-                        <p className={`text-[10px] font-bold ${record.diferencia_unidades < 0 ? 'text-red-500' : 'text-secondary'}`}>
+                        <div className="flex items-center justify-end gap-1">
+                          <span className="text-lg font-display font-bold text-gray-800">{record.cantidad_fisica}</span>
+                          <span className="text-[10px] text-gray-400 font-bold uppercase">uds</span>
+                        </div>
+                        <p className={`text-[10px] font-black uppercase tracking-widest ${record.diferencia_unidades < 0 ? 'text-red-500' : 'text-green-600'}`}>
                           {record.diferencia_unidades === 0 ? 'CONCILIADO' : `${record.diferencia_unidades} UDS`}
                         </p>
                       </div>
@@ -254,6 +297,22 @@ const App: React.FC = () => {
             setSelectedArticulo(null);
             fetchData();
           }}
+        />
+      )}
+      {showItemModal && (
+        <ItemModal
+          initialSku={tempSku}
+          onClose={() => setShowItemModal(false)}
+          onSave={handleItemCreated}
+        />
+      )}
+
+      {showSupervisorAuth && (
+        <SupervisorAuthModal
+          isOpen={showSupervisorAuth}
+          sku={tempSku}
+          onClose={() => setShowSupervisorAuth(false)}
+          onSuccess={handleSupervisorSuccess}
         />
       )}
 

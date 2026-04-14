@@ -1,25 +1,60 @@
 import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Articulo } from '../types';
-import { X, Save, AlertCircle, Package } from 'lucide-react';
+import { X, Save, AlertCircle, Package, Info } from 'lucide-react';
+import SearchableSelect from './SearchableSelect';
 
 interface ItemModalProps {
   articulo?: Articulo; // If provided, we are editing
+  initialSku?: string; // If provided, pre-fill for new item
   onClose: () => void;
   onSave: () => void;
 }
 
 export const ItemModal: React.FC<ItemModalProps> = ({ articulo, onClose, onSave }) => {
   const [formData, setFormData] = useState({
-    sku: articulo?.sku || '',
+    sku: articulo?.sku || initialSku || '',
     nombre: articulo?.nombre || '',
     categoria: articulo?.categoria || '',
+    marca: articulo?.marca || '',
     costo_unitario: articulo?.costo_unitario || 0,
     stock_sistema: articulo?.stock_sistema || 0,
     descripcion: articulo?.descripcion || ''
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [brands, setBrands] = useState<string[]>([]);
+
+  React.useEffect(() => {
+    fetchAuxData();
+  }, []);
+
+  const fetchAuxData = async () => {
+    try {
+      const { data: catData } = await supabase.rpc('get_unique_categories');
+      const { data: brandData } = await supabase.rpc('get_unique_brands');
+      
+      // Si la RPC no existe aún (la crearé luego), usaremos un select distinct simple
+      if (!catData) {
+        const { data: res } = await supabase.from('articulos').select('categoria').not('categoria', 'is', null);
+        const unique = Array.from(new Set(res?.map(r => r.categoria) || []));
+        setCategories(unique as string[]);
+      } else {
+        setCategories(catData);
+      }
+
+      if (!brandData) {
+        const { data: res } = await supabase.from('articulos').select('marca').not('marca', 'is', null);
+        const unique = Array.from(new Set(res?.map(r => r.marca) || []));
+        setBrands(unique as string[]);
+      } else {
+        setBrands(brandData);
+      }
+    } catch (e) {
+      console.error('Error fetching categories/brands', e);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,46 +128,67 @@ export const ItemModal: React.FC<ItemModalProps> = ({ articulo, onClose, onSave 
             />
           </div>
 
+          <div className="grid grid-cols-1 gap-4">
+            <SearchableSelect
+              label="Categoría"
+              options={categories}
+              value={formData.categoria}
+              onChange={(val) => setFormData({ ...formData, categoria: val })}
+              placeholder="Seleccionar categoría..."
+            />
+            
+            <SearchableSelect
+              label="Marca"
+              options={brands}
+              value={formData.marca}
+              onChange={(val) => setFormData({ ...formData, marca: val })}
+              placeholder="Seleccionar marca..."
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-on-surface/50 ml-1">Categoría</label>
-              <input 
-                className="input-field"
-                placeholder="Ej: Electrónica"
-                value={formData.categoria}
-                onChange={e => setFormData({ ...formData, categoria: e.target.value })}
-              />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] uppercase font-bold text-on-surface/50 ml-1">Costo Unitario</label>
+              <label className="text-[10px] uppercase font-bold text-gray-400 tracking-widest ml-1">Costo (S/)</label>
               <input 
                 type="number"
                 step="0.01"
-                className="input-field"
+                className="w-full bg-gray-50 border border-gray-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
                 value={formData.costo_unitario}
                 onChange={e => setFormData({ ...formData, costo_unitario: Number(e.target.value) })}
               />
             </div>
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-bold text-gray-400 tracking-widest ml-1">Stock Sistema</label>
+              <input 
+                type="number"
+                className="w-full bg-gray-50 border border-gray-100 px-4 py-3 rounded-xl focus:ring-2 focus:ring-primary/20 outline-none transition-all font-bold"
+                placeholder="0"
+                value={formData.stock_sistema}
+                onChange={e => setFormData({ ...formData, stock_sistema: Number(e.target.value) })}
+              />
+            </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[10px] uppercase font-bold text-on-surface/50 ml-1">Stock de Sistema inicial</label>
-            <input 
-              type="number"
-              className="input-field"
-              placeholder="0"
-              value={formData.stock_sistema}
-              onChange={e => setFormData({ ...formData, stock_sistema: Number(e.target.value) })}
-            />
+          <div className="bg-blue-50 p-4 rounded-2xl flex items-start gap-3">
+            <Info className="w-5 h-5 text-primary shrink-0 mt-0.5" />
+            <p className="text-[10px] text-primary/70 font-medium leading-relaxed">
+              Al guardar, este producto formará parte del maestro oficial. Asegúrese de que los datos coincidan con la etiqueta física.
+            </p>
           </div>
 
           <button 
             type="submit"
             disabled={loading}
-            className="btn-primary w-full flex items-center justify-center gap-2 py-4 mt-4"
+            className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-white font-bold transition-all shadow-lg active:scale-[0.98] ${
+              loading ? 'bg-gray-400' : 'bg-primary hover:bg-primary/90 shadow-primary/20'
+            }`}
           >
-            <Save size={20} />
-            {loading ? 'Guardando...' : 'Guardar Artículo'}
+            {loading ? <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div> : (
+              <>
+                <Save size={20} />
+                <span>{articulo ? 'Actualizar Maestro' : 'Registrar en Maestro'}</span>
+              </>
+            )}
           </button>
         </form>
       </div>

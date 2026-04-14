@@ -8,19 +8,19 @@ export default {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#003178',
-          container: '#0d47a1',
+          DEFAULT: '#003B65',
+          container: '#004a7c',
           fixed: '#d9e2ff',
         },
         secondary: {
-          DEFAULT: '#006b5f',
-          container: '#8df5e4',
+          DEFAULT: '#00A1DE',
+          container: '#b3e5fc',
         },
         surface: {
-          DEFAULT: '#f7f9fb',
+          DEFAULT: '#F8FAFC',
           container: {
-            low: '#f2f4f6',
-            high: '#e6e8ea',
+            low: '#f1f5f9',
+            high: '#e2e8f0',
             lowest: '#ffffff',
           }
         }
