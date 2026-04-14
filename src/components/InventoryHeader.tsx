@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Calendar, Clock, ChevronDown } from 'lucide-react';
+import { MapPin, Calendar, ChevronDown } from 'lucide-react';
 import type { Inventario } from '../types';
 
 interface InventoryHeaderProps {

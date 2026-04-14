@@ -5,7 +5,6 @@ import {
   Search, 
   Loader2, 
   User, 
-  MapPin, 
   Image as ImageIcon,
   MessageSquare
 } from 'lucide-react';
