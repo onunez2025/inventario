@@ -10,7 +10,7 @@ import {
   X, 
   Loader2, 
   AlertCircle,
-  Lock,
+
   Plus,
   Mail,
   Key

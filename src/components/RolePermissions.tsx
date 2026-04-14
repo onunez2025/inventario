@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { rbacService, ALL_PERMISSIONS } from '../services/rbacService';
-import { PermissionKey, UserRole } from '../types';
+import type { PermissionKey, UserRole } from '../types';
 import { 
   Shield, 
-  Settings, 
-  Check, 
   Info, 
   Lock,
-  Unlock,
-  AlertCircle
+  Unlock
 } from 'lucide-react';
+
 
 export const RolePermissions: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('administrador');

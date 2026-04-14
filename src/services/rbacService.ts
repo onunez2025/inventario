@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { PermissionKey, PermissionDefinition, RolPermiso } from '../types';
+import type { PermissionKey, PermissionDefinition, RolPermiso } from '../types';
 
 export const ALL_PERMISSIONS: PermissionDefinition[] = [
   { 
