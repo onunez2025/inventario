@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface text-on-surface font-sans;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-display font-bold;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary text-on-primary px-6 py-3 rounded-md font-bold transition-all hover:opacity-90 active:scale-95;
+    background: linear-gradient(to bottom right, #003178, #0d47a1);
+  }
+  
+  .card {
+    @apply bg-surface-container-lowest rounded-lg p-6 shadow-sm border border-outline-variant/15;
+  }
+  
+  .input-field {
+    @apply w-full p-3 bg-surface-container-low border border-outline-variant/30 rounded-md focus:outline-none focus:ring-2 focus:ring-primary/50;
+  }
+}
