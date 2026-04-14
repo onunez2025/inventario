@@ -45,19 +45,12 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0c10] flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Dynamic Professional Background */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/20 blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/20 blur-[120px] animate-pulse delay-700" />
-        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] rounded-full bg-blue-500/10 blur-[100px]" />
-        
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" 
-             style={{ backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
-      </div>
+    <div className="min-h-screen bg-surface flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Decorative Gradients */}
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-pulse" />
+      <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse" />
 
-      <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] border border-white/10 overflow-hidden relative z-10 animate-in zoom-in-95 duration-700">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-outline-variant/10 overflow-hidden relative z-10 animate-in zoom-in-95 duration-500">
         <div className="bg-primary p-10 text-white text-center relative">
           <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-black/20 overflow-hidden transform hover:scale-110 transition-transform">
              <img src="/logo.png" alt="Invent-IA Logo" className="w-16 h-16 object-contain" />
@@ -127,13 +120,10 @@ export const LoginPage: React.FC = () => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full relative group overflow-hidden bg-primary text-white py-4 rounded-2xl flex items-center justify-center gap-3 mt-6 font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_20px_40px_-12px_rgba(0,49,120,0.3)]"
+                className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center gap-3 mt-6 shadow-xl shadow-primary/20"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary-container to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative flex items-center gap-3">
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : <LogIn size={20} />}
-                  {loading ? 'Iniciando...' : 'Entrar al Sistema'}
-                </div>
+                {loading ? <Loader2 className="animate-spin" size={20} /> : <LogIn size={20} />}
+                {loading ? 'Iniciando...' : 'Entrar al Sistema'}
               </button>
             </form>
           ) : (
@@ -156,13 +146,10 @@ export const LoginPage: React.FC = () => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="w-full relative group overflow-hidden bg-primary text-white py-4 rounded-2xl flex items-center justify-center gap-3 mt-6 font-bold transition-all hover:scale-[1.02] active:scale-[0.98] shadow-[0_20px_40px_-12px_rgba(0,49,120,0.3)]"
+                className="btn-primary w-full py-4 rounded-2xl flex items-center justify-center gap-3 mt-6 shadow-xl shadow-primary/20"
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary-container to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div className="relative flex items-center gap-3">
-                  {loading ? <Loader2 className="animate-spin" size={20} /> : <Key size={20} />}
-                  {loading ? 'Enviando...' : 'Recuperar Contraseña'}
-                </div>
+                {loading ? <Loader2 className="animate-spin" size={20} /> : <Key size={20} />}
+                {loading ? 'Enviando...' : 'Recuperar Contraseña'}
               </button>
 
               <button 
@@ -176,8 +163,8 @@ export const LoginPage: React.FC = () => {
           )}
         </div>
         
-        <div className="bg-surface-container-low/50 backdrop-blur-md p-6 text-center border-t border-black/5">
-           <p className="text-[10px] text-on-surface/40 font-bold uppercase tracking-[0.2em]">© 2026 MT INDUSTRIAL S.A.C - Sistema Interno</p>
+        <div className="bg-surface-container-low p-6 text-center">
+           <p className="text-[10px] text-on-surface/40 font-medium uppercase tracking-widest">© 2026 MT INDUSTRIAL S.A.C - Sistema Interno</p>
         </div>
       </div>
     </div>
