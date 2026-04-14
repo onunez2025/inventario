@@ -15,9 +15,7 @@ import {
   MapPin, 
   Activity, 
   TrendingDown, 
-  TrendingUp, 
-  CheckCircle2, 
-  AlertCircle 
+  CheckCircle2
 } from 'lucide-react';
 import type { ConciliacionRecord } from '../types';
 

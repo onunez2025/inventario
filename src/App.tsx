@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import type { Articulo, ConciliacionRecord, Perfil, Inventario } from './types';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer, 
-  Cell 
-} from 'recharts';
+
 import { 
   Camera, 
   Package, 
-  AlertTriangle, 
   TrendingDown, 
   LogOut, 
   User, 
@@ -174,8 +165,7 @@ const App: React.FC = () => {
   if (!session) return <LoginPage />;
   if (!perfil && loading) return <div className="min-h-screen flex items-center justify-center bg-surface"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
 
-  const totalPerdida = data.reduce((acc, curr) => acc + Math.min(0, curr.diferencia_valorizada), 0);
-  const descuadresCriticos = data.filter(d => Math.abs(d.diferencia_unidades) > 5).length;
+
   const progreso = {
     total: activeInventory ? (data.length || 0) : 0,
     completados: data.filter(d => d.cantidad_fisica > 0).length
