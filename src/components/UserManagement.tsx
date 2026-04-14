@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
 import { 
   Users, 
   Shield, 
@@ -9,7 +10,10 @@ import {
   X, 
   Loader2, 
   AlertCircle,
-  Lock
+  Lock,
+  Plus,
+  Mail,
+  Key
 } from 'lucide-react';
 import type { Perfil, UserRole } from '../types';
 
@@ -23,12 +27,79 @@ export const UserManagement: React.FC = () => {
     nombre: '',
     rol: 'operario'
   });
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [addForm, setAddForm] = useState({
+    nombre: '',
+    email: '',
+    password: '',
+    rol: 'operario' as UserRole
+  });
 
   const roles: UserRole[] = ['administrador', 'supervisor', 'operario'];
 
   useEffect(() => {
     fetchPerfiles();
   }, []);
+
+  const handleCreateUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsCreating(true);
+    setError(null);
+
+    try {
+      // Create a temporary client that doesn't persist the session,
+      // avoiding kicking out the current user admin
+      const tempClient = createClient(supabaseUrl, supabaseAnonKey, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false }
+      });
+
+      const { data: authData, error: authError } = await tempClient.auth.signUp({
+        email: addForm.email,
+        password: addForm.password,
+        options: {
+          data: {
+            full_name: addForm.nombre,
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user?.id) {
+         throw new Error("No se pudo crear el usuario en Auth.");
+      }
+
+      // Wait a moment for trigger to execute if any
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Attempt to upsert the role manually to make sure it's saved correctly
+      const { error: dbError } = await supabase.from('perfiles').upsert({
+         id: authData.user.id,
+         email: addForm.email,
+         nombre: addForm.nombre,
+         rol: addForm.rol
+      });
+
+      if (dbError) {
+         console.warn("No se pudo insertar en perfiles directamente. Intentando update...", dbError);
+         // If RLS prevents upsert, we just use update (assuming the trigger inserted the row)
+         await supabase.from('perfiles').update({
+             nombre: addForm.nombre,
+             rol: addForm.rol
+         }).eq('id', authData.user.id);
+      }
+
+      setAddForm({ nombre: '', email: '', password: '', rol: 'operario' });
+      setIsAddModalOpen(false);
+      fetchPerfiles();
+
+    } catch (err: any) {
+      setError('Error al crear usuario: ' + err.message);
+    } finally {
+      setIsCreating(false);
+    }
+  };
 
   const fetchPerfiles = async () => {
     setLoading(true);
@@ -106,15 +177,24 @@ export const UserManagement: React.FC = () => {
           <p className="text-gray-500 font-medium">Administra accesos y roles de la plataforma Invent-IA</p>
         </div>
 
-        <div className="relative w-full md:w-80">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
-          <input 
-            type="text" 
-            placeholder="Buscar por nombre o email..."
-            className="w-full bg-white border border-gray-200 rounded-2xl py-4 pl-12 pr-4 text-gray-800 outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all placeholder:text-gray-300 shadow-sm"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+            <input 
+              type="text" 
+              placeholder="Buscar por nombre o email..."
+              className="w-full bg-white border border-gray-200 rounded-2xl py-4 pl-12 pr-4 text-gray-800 outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all placeholder:text-gray-300 shadow-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="w-full sm:w-auto px-6 py-4 bg-primary text-white rounded-2xl font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all shrink-0"
+          >
+            <Plus size={20} />
+            Nuevo Usuario
+          </button>
         </div>
       </div>
 
@@ -230,6 +310,98 @@ export const UserManagement: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal for Creating User */}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" 
+            onClick={() => !isCreating && setIsAddModalOpen(false)}
+          />
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-primary/10 rounded-xl">
+                  <Shield className="text-primary" size={20} />
+                </div>
+                <h3 className="text-xl font-display font-black tracking-tight text-gray-800">Nueva Identidad</h3>
+              </div>
+              <button 
+                onClick={() => setIsAddModalOpen(false)}
+                className="p-2 bg-gray-100 text-gray-400 rounded-full hover:bg-gray-200 hover:text-gray-600 transition-colors"
+                disabled={isCreating}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateUser} className="p-8 space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-[10px] uppercase font-bold text-gray-400 ml-1 tracking-widest">Nombre del Responsable</label>
+                <input 
+                  type="text" 
+                  required
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3.5 px-4 text-gray-800 outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium placeholder:text-gray-300"
+                  placeholder="Ej: Oscar Núñez"
+                  value={addForm.nombre}
+                  onChange={(e) => setAddForm({...addForm, nombre: e.target.value})}
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] uppercase font-bold text-gray-400 ml-1 tracking-widest">Correo Corporativo</label>
+                <div className="relative">
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input 
+                    type="email" 
+                    required
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3.5 pl-11 pr-4 text-gray-800 outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium placeholder:text-gray-300"
+                    placeholder="nombre@empresa.com"
+                    value={addForm.email}
+                    onChange={(e) => setAddForm({...addForm, email: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] uppercase font-bold text-gray-400 ml-1 tracking-widest">Contraseña Inicial</label>
+                <div className="relative">
+                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input 
+                    type="password" 
+                    required
+                    minLength={6}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3.5 pl-11 pr-4 text-gray-800 outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium placeholder:text-gray-300"
+                    placeholder="••••••••"
+                    value={addForm.password}
+                    onChange={(e) => setAddForm({...addForm, password: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[10px] uppercase font-bold text-gray-400 ml-1 tracking-widest">Perfil de Seguridad</label>
+                <select 
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3.5 px-4 text-gray-800 text-sm font-bold outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all appearance-none cursor-pointer"
+                  value={addForm.rol}
+                  onChange={(e) => setAddForm({...addForm, rol: e.target.value as UserRole})}
+                >
+                  {roles.map(r => <option key={r} value={r} className="capitalize">{r}</option>)}
+                </select>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isCreating}
+                className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 mt-4 text-white bg-primary shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {isCreating ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
+                {isCreating ? 'Procesando identidades...' : 'Confirmar Usuario'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
