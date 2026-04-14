@@ -48,6 +48,7 @@ const App: React.FC = () => {
   const [showProfile, setShowProfile] = useState(false);
   const [tempSku, setTempSku] = useState('');
   const [activeTab, setActiveTab] = useState<'summary' | 'system_stock' | 'physical_counts'>('summary');
+  const [recentCounts, setRecentCounts] = useState<any[]>([]);
 
   useEffect(() => {
     // 1. Manejar sesión inicial y cambios
@@ -128,6 +129,24 @@ const App: React.FC = () => {
 
     if (error) console.error('Error fetching data:', error);
     else setData(records || []);
+
+    // Fetch individual recent counts for the activity feed
+    const { data: recent, error: recentError } = await supabase
+      .from('conteos')
+      .select(`
+        id,
+        cantidad_fisica,
+        created_at,
+        observacion,
+        articulos(sku, nombre)
+      `)
+      .eq('inventario_id', activeInventory.id)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    if (recentError) console.error('Error fetching recent counts:', recentError);
+    else setRecentCounts(recent || []);
+
     setLoading(false);
   };
 
@@ -288,29 +307,28 @@ const App: React.FC = () => {
                   onChangeInventory={() => setActiveInventory(null)} 
                 />
 
-                {(hasPermission('view_master') || hasPermission('view_inventory_sessions')) && (
-
-                  <div className="flex bg-gray-100 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
-                    <button 
-                      onClick={() => setActiveTab('summary')}
-                      className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'summary' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                      Resumen Cruce
-                    </button>
+                <div className="flex bg-gray-100 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
+                  <button 
+                    onClick={() => setActiveTab('summary')}
+                    className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'summary' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Resumen Cruce
+                  </button>
+                  {hasPermission('view_master') && (
                     <button 
                       onClick={() => setActiveTab('system_stock')}
                       className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'system_stock' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                       Stock Sistema
                     </button>
-                    <button 
-                      onClick={() => setActiveTab('physical_counts')}
-                      className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'physical_counts' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-                    >
-                      Conteos Detalle
-                    </button>
-                  </div>
-                )}
+                  )}
+                  <button 
+                    onClick={() => setActiveTab('physical_counts')}
+                    className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'physical_counts' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                  >
+                    Conteos Detalle
+                  </button>
+                </div>
 
                 {/* Tab: Stock de Sistema */}
                 {activeTab === 'system_stock' && hasPermission('view_master') && (
@@ -321,7 +339,7 @@ const App: React.FC = () => {
                 )}
 
                 {/* Tab: Historial Detallado de Conteos */}
-                {activeTab === 'physical_counts' && hasPermission('view_inventory_sessions') && (
+                {activeTab === 'physical_counts' && (
 
                   <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
                      <PhysicalCountsTable inventarioId={activeInventory.id} />
@@ -368,7 +386,7 @@ const App: React.FC = () => {
                 <section className="space-y-4">
                   <h3 className="text-lg px-2">Actividad de Inventario</h3>
                   <div className="space-y-3">
-                      {data.filter(d => d.cantidad_fisica > 0).length === 0 ? (
+                      {recentCounts.length === 0 ? (
                         <div className="text-center py-16 bg-gray-50 rounded-[2rem] border-2 border-dashed border-gray-200">
                           <Package size={48} className="mx-auto mb-3 text-gray-300" />
                           <p className="text-sm text-gray-400 font-medium">No se han registrado conteos hoy</p>
@@ -379,32 +397,38 @@ const App: React.FC = () => {
                             Empezar a Escanear
                           </button>
                         </div>
-                      ) : data.filter(d => d.cantidad_fisica > 0).map(record => (
-                        <div 
-                          key={record.sku} 
-                          className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center group active:scale-[0.98] transition-all cursor-pointer hover:border-secondary/30" 
-                          onClick={() => handleScan(record.sku)}
-                        >
-                          <div className="flex items-center gap-4">
-                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${record.diferencia_unidades === 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600'}`}>
-                              <Package size={24} />
+                      ) : (
+                        recentCounts.map(count => (
+                          <div 
+                            key={count.id} 
+                            className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center group active:scale-[0.98] transition-all cursor-pointer hover:border-secondary/30" 
+                            onClick={() => handleScan(count.articulos?.sku)}
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-2xl bg-secondary/10 text-secondary flex items-center justify-center transition-colors">
+                                <Package size={24} />
+                              </div>
+                              <div className="max-w-[180px]">
+                                <p className="text-sm font-bold text-gray-800 line-clamp-1">{count.articulos?.nombre}</p>
+                                <div className="flex items-center gap-2">
+                                  <p className="text-[10px] text-gray-400 font-mono uppercase tracking-tighter">{count.articulos?.sku}</p>
+                                  <span className="text-[8px] text-gray-300 font-bold">•</span>
+                                  <p className="text-[9px] text-gray-400 font-bold">{new Date(count.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                                </div>
+                              </div>
                             </div>
-                            <div className="max-w-[180px]">
-                              <p className="text-sm font-bold text-gray-800">{record.articulo_nombre}</p>
-                              <p className="text-[10px] text-gray-400 font-mono uppercase tracking-tighter">{record.sku}</p>
+                            <div className="text-right">
+                              <div className="flex items-center justify-end gap-1">
+                                <span className="text-lg font-display font-bold text-secondary">{count.cantidad_fisica}</span>
+                                <span className="text-[10px] text-gray-400 font-bold uppercase">uds</span>
+                              </div>
+                              <p className="text-[9px] font-black uppercase tracking-widest text-on-surface/30 truncate max-w-[80px]">
+                                {count.observacion || 'Conteo'}
+                              </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <div className="flex items-center justify-end gap-1">
-                              <span className="text-lg font-display font-bold text-gray-800">{record.cantidad_fisica}</span>
-                              <span className="text-[10px] text-gray-400 font-bold uppercase">uds</span>
-                            </div>
-                            <p className={`text-[10px] font-black uppercase tracking-widest ${record.diferencia_unidades < 0 ? 'text-red-500' : 'text-green-600'}`}>
-                              {record.diferencia_unidades === 0 ? 'CONCILIADO' : `${record.diferencia_unidades} UDS`}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                        ))
+                      )}
                   </div>
                 </section>
               </div>
