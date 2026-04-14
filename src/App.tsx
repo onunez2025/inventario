@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import type { Articulo, ConciliacionRecord } from './types';
+import type { Articulo, ConciliacionRecord, Perfil } from './types';
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Camera, Package, AlertTriangle, Users, TrendingDown } from 'lucide-react';
+import { Camera, Package, AlertTriangle, Users, TrendingDown, LogOut } from 'lucide-react';
 import { ScannerComponent } from './components/ScannerComponent';
 import { VerificationModal } from './components/VerificationModal';
 import { ItemMaster } from './components/ItemMaster';
+import { LoginPage } from './components/LoginPage';
 
 const App: React.FC = () => {
+  const [session, setSession] = useState<any>(null);
+  const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [data, setData] = useState<ConciliacionRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'status' | 'master'>('status');
@@ -15,10 +18,40 @@ const App: React.FC = () => {
   const [selectedArticulo, setSelectedArticulo] = useState<Articulo | null>(null);
 
   useEffect(() => {
-    if (view === 'status') {
+    // 1. Manejar sesión inicial y cambios
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) fetchPerfil(session.user.id);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) fetchPerfil(session.user.id);
+      else setPerfil(null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchPerfil = async (userId: string) => {
+    const { data, error } = await supabase
+      .from('perfiles')
+      .select('*')
+      .eq('id', userId)
+      .single();
+    
+    if (data && !error) {
+      setPerfil(data);
+      // Si el usuario es operario, forzar vista status (no tiene acceso a master)
+      if (data.rol === 'operario') setView('status');
+    }
+  };
+
+  useEffect(() => {
+    if (session && view === 'status') {
       fetchData();
     }
-  }, [view]);
+  }, [session, view]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -29,6 +62,10 @@ const App: React.FC = () => {
     if (error) console.error('Error fetching data:', error);
     else setData(records || []);
     setLoading(false);
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
   };
 
   const handleScan = async (sku: string) => {
@@ -46,6 +83,10 @@ const App: React.FC = () => {
     }
   };
 
+  // Redirigir a Login si no hay sesión
+  if (!session) return <LoginPage />;
+  if (!perfil && loading) return <div className="min-h-screen flex items-center justify-center bg-surface"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div></div>;
+
   const totalPerdida = data.reduce((acc, curr) => acc + Math.min(0, curr.diferencia_valorizada), 0);
   const descuadresCriticos = data.filter(d => Math.abs(d.diferencia_unidades) > 5).length;
   const progreso = {
@@ -55,10 +96,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
-      {/* Conditionally render content but keep the Nav fixed if desired, 
-          or just separate the concerns. Let's keep common layout. */}
-      
-      {view === 'master' ? (
+      {view === 'master' && perfil?.rol === 'supervisor' ? (
         <ItemMaster onBack={() => setView('status')} />
       ) : (
         <>
@@ -66,26 +104,38 @@ const App: React.FC = () => {
           <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-10">
             <div className="max-w-4xl mx-auto flex justify-between items-center">
               <h1 className="text-xl font-display uppercase tracking-widest">Inventory Curator</h1>
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                <Users size={20} />
+              <div className="flex items-center gap-3">
+                <div className="text-right hidden sm:block">
+                  <p className="text-[10px] uppercase font-bold text-primary-fixed/50 leading-none">{perfil?.rol}</p>
+                  <p className="text-xs font-bold">{perfil?.nombre || perfil?.email}</p>
+                </div>
+                <button 
+                  onClick={handleLogout}
+                  className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center hover:bg-red-500 transition-colors group"
+                  title="Cerrar Sesión"
+                >
+                  <LogOut size={20} className="group-hover:scale-110 transition-transform" />
+                </button>
               </div>
             </div>
           </header>
 
           <main className="p-4 max-w-4xl mx-auto space-y-6 pb-24 flex-1">
-            {/* KPI Section */}
-            <section className="grid grid-cols-2 gap-4">
-              <div className="card space-y-1">
-                <TrendingDown className="text-red-500 mb-2" size={24} />
-                <p className="text-sm text-on-surface/60">Pérdida Valorizada</p>
-                <h2 className="text-2xl font-display text-red-600">S/. {Math.abs(totalPerdida).toLocaleString()}</h2>
-              </div>
-              <div className="card space-y-1">
-                <AlertTriangle className="text-amber-500 mb-2" size={24} />
-                <p className="text-sm text-on-surface/60">Descuadres Críticos</p>
-                <h2 className="text-2xl font-display">{descuadresCriticos}</h2>
-              </div>
-            </section>
+            {/* Solo Supervisores ven KPIs Financieros */}
+            {perfil?.rol === 'supervisor' && (
+              <section className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-500">
+                <div className="card space-y-1">
+                  <TrendingDown className="text-red-500 mb-2" size={24} />
+                  <p className="text-sm text-on-surface/60">Pérdida Valorizada</p>
+                  <h2 className="text-2xl font-display text-red-600">S/. {Math.abs(totalPerdida).toLocaleString()}</h2>
+                </div>
+                <div className="card space-y-1">
+                  <AlertTriangle className="text-amber-500 mb-2" size={24} />
+                  <p className="text-sm text-on-surface/60">Descuadres Críticos</p>
+                  <h2 className="text-2xl font-display">{descuadresCriticos}</h2>
+                </div>
+              </section>
+            )}
 
             {/* Progress Card */}
             <section className="card bg-primary-fixed/30 border-primary/10">
@@ -104,30 +154,37 @@ const App: React.FC = () => {
               </div>
             </section>
 
-            {/* Chart Section */}
-            <section className="card h-64">
-              <h3 className="mb-4 text-sm uppercase tracking-wider text-on-surface/50">Top Diferencias</h3>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={data.filter(d => d.diferencia_unidades !== 0).slice(0, 5)}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
-                  <XAxis dataKey="sku" hide />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', background: '#fff' }}
-                  />
-                  <Bar dataKey="diferencia_valorizada">
-                    {data.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.diferencia_valorizada < 0 ? '#dc2626' : '#059669'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            </section>
+            {/* Solo Supervisores ven Gráfico */}
+            {perfil?.rol === 'supervisor' && data.length > 0 && (
+              <section className="card h-64 animate-in fade-in duration-700">
+                <h3 className="mb-4 text-sm uppercase tracking-wider text-on-surface/50">Diferencias por Producto</h3>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={data.filter(d => d.diferencia_unidades !== 0).slice(0, 8)}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} strokeOpacity={0.1} />
+                    <XAxis dataKey="sku" hide />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 50px rgba(0,0,0,0.1)', background: '#fff' }}
+                    />
+                    <Bar dataKey="diferencia_valorizada" radius={[4, 4, 0, 0]}>
+                      {data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.diferencia_valorizada < 0 ? '#dc2626' : '#059669'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </section>
+            )}
 
             {/* List of Recent counts */}
             <section className="space-y-4">
               <h3 className="text-lg px-2">Actividad de Inventario</h3>
               <div className="space-y-3">
-                  {data.filter(d => d.cantidad_fisica > 0).map(record => (
+                  {data.filter(d => d.cantidad_fisica > 0).length === 0 ? (
+                    <div className="text-center py-10 opacity-30 border-2 border-dashed border-on-surface/20 rounded-3xl">
+                      <Package size={48} className="mx-auto mb-2" />
+                      <p className="text-sm">No hay registros hoy</p>
+                    </div>
+                  ) : data.filter(d => d.cantidad_fisica > 0).map(record => (
                     <div key={record.sku} className="card p-4 flex justify-between items-center group active:scale-95 transition-all cursor-pointer" onClick={() => handleScan(record.sku)}>
                       <div className="flex items-center gap-4">
                         <div className={`p-2 rounded-xl ${record.diferencia_unidades === 0 ? 'bg-secondary/10 text-secondary' : 'bg-red-50 text-red-500'}`}>
@@ -156,7 +213,7 @@ const App: React.FC = () => {
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-outline-variant/30 px-6 py-4 pb-8 flex justify-between items-center z-20">
         <button 
           onClick={() => setView('status')}
-          className={`flex flex-col items-center flex-1 ${view === 'status' ? 'text-primary' : 'text-on-surface/30'}`}
+          className={`flex flex-col items-center flex-1 transition-all ${view === 'status' ? 'text-primary scale-110' : 'text-on-surface/30'}`}
         >
           <TrendingDown size={24} />
           <span className="text-[10px] uppercase mt-1 font-bold">Status</span>
@@ -169,13 +226,16 @@ const App: React.FC = () => {
           <Camera size={28} />
         </button>
         
-        <button 
-          onClick={() => setView('master')}
-          className={`flex flex-col items-center flex-1 ${view === 'master' ? 'text-primary' : 'text-on-surface/30'}`}
-        >
-          <Package size={24} />
-          <span className="text-[10px] uppercase mt-1 font-bold">Master</span>
-        </button>
+        {/* Solo Supervisores ven el Maestro */}
+        {perfil?.rol === 'supervisor' && (
+          <button 
+            onClick={() => setView('master')}
+            className={`flex flex-col items-center flex-1 transition-all ${view === 'master' ? 'text-primary scale-110' : 'text-on-surface/30'}`}
+          >
+            <Package size={24} />
+            <span className="text-[10px] uppercase mt-1 font-bold">Master</span>
+          </button>
+        )}
       </nav>
 
       {/* Modals */}
@@ -197,7 +257,7 @@ const App: React.FC = () => {
         />
       )}
 
-      {loading && (
+      {loading && !data.length && (
         <div className="fixed inset-0 bg-white/50 backdrop-blur-sm flex items-center justify-center z-[100]">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
         </div>

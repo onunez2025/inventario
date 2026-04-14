@@ -27,9 +27,18 @@ export interface Conteo {
   created_at: string;
 }
 
+export type UserRole = 'supervisor' | 'operario';
+
+export interface Perfil {
+  id: string;
+  email: string;
+  nombre: string;
+  rol: UserRole;
+  created_at?: string;
+}
+
 export interface ConciliacionRecord {
-  inventario_id: string;
-  tienda_nombre: string;
+  articulo_id: string;
   sku: string;
   articulo_nombre: string;
   costo_unitario: number;
@@ -37,4 +46,6 @@ export interface ConciliacionRecord {
   cantidad_fisica: number;
   diferencia_unidades: number;
   diferencia_valorizada: number;
+  ultima_observacion?: string;
+  ultima_foto?: string;
 }
