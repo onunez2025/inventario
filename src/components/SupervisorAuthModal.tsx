@@ -30,7 +30,7 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
       const { data, error: fetchError } = await supabase
         .from('configuracion')
         .select('valor')
-        .eq('clave', 'PIN_SUPERVISOR')
+        .eq('clave', 'supervisor_pin')
         .single();
 
       if (fetchError || !data) {
