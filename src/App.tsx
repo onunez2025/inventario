@@ -2,10 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import type { Articulo, ConciliacionRecord, Perfil } from './types';
 import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { Camera, Package, AlertTriangle, TrendingDown, LogOut, User, Database } from 'lucide-react';
+import { ScannerComponent } from './components/ScannerComponent';
+import { VerificationModal } from './components/VerificationModal';
+import { ItemMaster } from './components/ItemMaster';
+import { LoginPage } from './components/LoginPage';
 import SupervisorAuthModal from './components/SupervisorAuthModal';
 import { ItemModal } from './components/ItemModal';
 import { ProfileModal } from './components/ProfileModal';
-import { Camera, Package, AlertTriangle, TrendingDown, LogOut, User, Database } from 'lucide-react';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
