@@ -1,4 +1,5 @@
 # Build stage
+# Build for Inventory - v1.0.1 - Force Cache Refresh
 FROM node:20-slim AS build
 WORKDIR /app
 COPY package*.json ./
