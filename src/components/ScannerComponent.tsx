@@ -66,7 +66,7 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
   };
 
   return (
-    <div className="fixed inset-0 bg-black/95 z-[100] flex flex-col items-center justify-center p-6 text-white text-center animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-black/95 z-[200] flex flex-col items-center justify-center p-6 text-white text-center animate-in fade-in duration-300">
       {/* Scanner Wrapper */}
       <div className="relative w-full max-w-sm aspect-square bg-white/5 rounded-[40px] border-2 border-white/20 overflow-hidden shadow-2xl shadow-primary/10">
         <div id="reader" className="w-full h-full object-cover" />

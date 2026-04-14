@@ -118,7 +118,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
-      {view === 'master' && perfil?.rol === 'supervisor' ? (
+      {(view === 'master' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador')) ? (
         <ItemMaster onBack={() => setView('status')} />
       ) : (
         <>
@@ -151,8 +151,8 @@ const App: React.FC = () => {
           </header>
 
           <main className="p-4 max-w-4xl mx-auto space-y-6 pb-24 flex-1">
-            {/* Solo Supervisores ven KPIs Financieros */}
-            {perfil?.rol === 'supervisor' && (
+            {/* Solo Supervisores/Admins ven KPIs Financieros */}
+            {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
               <section className="grid grid-cols-2 gap-4 animate-in slide-in-from-top-4 duration-500">
                 <div className="bg-white p-5 rounded-3xl shadow-sm border border-gray-100 space-y-1 relative overflow-hidden group">
                   <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -194,8 +194,8 @@ const App: React.FC = () => {
               <p className="mt-3 text-[10px] uppercase font-bold text-blue-200 tracking-widest">{progreso.completados} de {progreso.total} productos auditados</p>
             </section>
 
-            {/* Solo Supervisores ven Gráfico */}
-            {perfil?.rol === 'supervisor' && data.length > 0 && (
+            {/* Solo Supervisores/Admins ven Gráfico */}
+            {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && data.length > 0 && (
               <section className="card h-64 animate-in fade-in duration-700">
                 <h3 className="mb-4 text-sm uppercase tracking-wider text-on-surface/50">Diferencias por Producto</h3>
                 <ResponsiveContainer width="100%" height="100%">
@@ -263,7 +263,8 @@ const App: React.FC = () => {
       )}
 
       {/* Floating Bottom Nav for Mobile - Persistent */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-outline-variant/30 px-4 py-3 pb-8 flex justify-between items-center z-[140]">
+      {!showScanner && (
+        <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-outline-variant/30 px-4 py-3 pb-8 flex justify-between items-center z-[140]">
         <button 
           onClick={() => setView('status')}
           className={`flex flex-col items-center flex-1 transition-all ${view === 'status' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
@@ -279,15 +280,24 @@ const App: React.FC = () => {
           <Camera size={26} />
         </button>
         
-        {/* Solo Supervisores ven el Maestro */}
-        {perfil?.rol === 'supervisor' && (
-          <button 
-            onClick={() => setView('master')}
-            className={`flex flex-col items-center flex-1 transition-all ${view === 'master' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
-          >
-            <Database size={22} />
-            <span className="text-[9px] uppercase mt-1">Maestro</span>
-          </button>
+        {/* Solo Supervisores/Admins ven el Maestro y Usuarios */}
+        {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+          <>
+            <button 
+              onClick={() => setView('master')}
+              className={`flex flex-col items-center flex-1 transition-all ${view === 'master' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
+            >
+              <Database size={22} />
+              <span className="text-[9px] uppercase mt-1">Maestro</span>
+            </button>
+            <button 
+              onClick={() => alert('Gestión de Usuarios - Próximamente')}
+              className={`flex flex-col items-center flex-1 transition-all text-gray-400 opacity-50`}
+            >
+              <User size={22} className="text-gray-400" />
+              <span className="text-[9px] uppercase mt-1">Usuarios</span>
+            </button>
+          </>
         )}
 
         {/* Botón de Perfil en Nav para Mobile */}
@@ -298,7 +308,8 @@ const App: React.FC = () => {
           <User size={22} />
           <span className="text-[9px] uppercase mt-1">Perfil</span>
         </button>
-      </nav>
+        </nav>
+      )}
 
       {/* Modals */}
       {showScanner && (
@@ -338,6 +349,7 @@ const App: React.FC = () => {
       {showProfile && (
         <ProfileModal
           perfil={perfil}
+          session={session}
           onClose={() => setShowProfile(false)}
           onLogout={handleLogout}
         />

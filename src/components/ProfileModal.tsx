@@ -4,15 +4,19 @@ import type { Perfil } from '../types';
 
 interface ProfileModalProps {
   perfil: Perfil | null;
+  session: any;
   onClose: () => void;
   onLogout: () => void;
 }
 
-export const ProfileModal: React.FC<ProfileModalProps> = ({ perfil, onClose, onLogout }) => {
-  if (!perfil) return null;
+export const ProfileModal: React.FC<ProfileModalProps> = ({ perfil, session, onClose, onLogout }) => {
+  const userEmail = perfil?.email || session?.user?.email || 'No disponible';
+  const userName = perfil?.nombre || session?.user?.user_metadata?.full_name || 'Mi Cuenta';
+  const userRole = perfil?.rol || 'Usuario';
+  const createdAt = perfil?.created_at || session?.user?.created_at;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] flex items-center justify-center p-4 min-h-[100dvh]">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[210] flex items-center justify-center p-4 min-h-[100dvh]">
       <div className="bg-white w-full max-w-sm rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="bg-primary p-8 text-white relative">
           <div className="absolute top-4 right-4">
@@ -25,10 +29,10 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ perfil, onClose, onL
             <div className="w-24 h-24 bg-white/20 rounded-full flex items-center justify-center mb-4 border-4 border-white/10">
               <User size={48} className="text-white" />
             </div>
-            <h2 className="text-2xl font-display font-black tracking-tight">{perfil.nombre || 'Usuario'}</h2>
+            <h2 className="text-2xl font-display font-black tracking-tight">{userName}</h2>
             <div className="mt-2 inline-flex items-center gap-1 bg-secondary px-3 py-1 rounded-full border border-white/20">
               <Shield size={12} className="text-white" />
-              <span className="text-[10px] uppercase font-bold tracking-widest text-white">{perfil.rol}</span>
+              <span className="text-[10px] uppercase font-bold tracking-widest text-white">{userRole}</span>
             </div>
           </div>
         </div>
@@ -41,7 +45,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ perfil, onClose, onL
               </div>
               <div>
                 <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Email Corporativo</p>
-                <p className="text-sm font-bold text-gray-700">{perfil.email}</p>
+                <p className="text-sm font-bold text-gray-700">{userEmail}</p>
               </div>
             </div>
 
@@ -52,7 +56,7 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ perfil, onClose, onL
               <div>
                 <p className="text-[10px] uppercase font-bold text-gray-400 tracking-widest">Cuenta creada</p>
                 <p className="text-sm font-bold text-gray-700">
-                  {perfil.created_at ? new Date(perfil.created_at).toLocaleDateString() : 'N/A'}
+                  {createdAt ? new Date(createdAt).toLocaleDateString() : 'N/A'}
                 </p>
               </div>
             </div>

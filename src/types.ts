@@ -28,7 +28,7 @@ export interface Conteo {
   created_at: string;
 }
 
-export type UserRole = 'supervisor' | 'operario';
+export type UserRole = 'supervisor' | 'operario' | 'administrador';
 
 export interface Perfil {
   id: string;
