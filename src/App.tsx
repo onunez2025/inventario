@@ -221,28 +221,32 @@ const App: React.FC = () => {
       ) : (
         <>
           {/* Header */}
-          <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-10 transition-all">
-            <div className="max-w-4xl mx-auto flex justify-between items-center">
-              <h1 className="text-2xl font-display font-black tracking-tighter text-white">Invent<span className="text-secondary">-IA</span></h1>
-              <div className="flex items-center gap-3">
+          <header className="bg-primary-container px-4 py-3 sm:p-4 text-white shadow-lg sticky top-0 z-50 transition-all">
+            <div className="max-w-4xl mx-auto flex justify-between items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-display font-black tracking-tighter text-white flex-shrink-0">
+                Invent<span className="text-secondary">-IA</span>
+              </h1>
+              <div className="flex items-center gap-2 sm:gap-3">
                 <button 
                   onClick={() => setShowProfile(true)}
-                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition-all px-3 py-1.5 rounded-2xl active:scale-95 border border-white/5"
+                  className="flex items-center gap-2 bg-white/10 hover:bg-white/20 transition-all px-2 py-1 sm:px-3 sm:py-1.5 rounded-2xl active:scale-95 border border-white/5 min-w-0"
                 >
-                  <div className="text-right">
-                    <p className="text-[10px] uppercase font-bold text-blue-200 leading-none tracking-widest">{perfil?.rol}</p>
-                    <p className="text-xs font-bold text-white">{perfil?.nombre?.split(' ')[0] || 'Mi Cuenta'}</p>
+                  <div className="text-right hidden xs:block">
+                    <p className="text-[9px] sm:text-[10px] uppercase font-bold text-blue-200 leading-none tracking-widest mb-0.5">{perfil?.rol}</p>
+                    <p className="text-xs font-bold text-white truncate max-w-[80px] sm:max-w-[120px]">{perfil?.nombre?.split(' ')[0] || 'Mi Cuenta'}</p>
                   </div>
-                  <div className="w-8 h-8 bg-secondary rounded-xl flex items-center justify-center shadow-lg">
-                    <User size={16} className="text-white" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-secondary rounded-lg sm:rounded-xl flex items-center justify-center shadow-lg flex-shrink-0">
+                    <User size={14} className="text-white sm:hidden" />
+                    <User size={16} className="text-white hidden sm:block" />
                   </div>
                 </button>
                 <button 
                   onClick={handleLogout}
-                  className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center hover:bg-red-500/80 transition-all group border border-white/5"
+                  className="w-9 h-9 sm:w-10 sm:h-10 bg-white/10 rounded-lg sm:rounded-xl flex items-center justify-center hover:bg-red-500/80 transition-all group border border-white/5 flex-shrink-0"
                   title="Cerrar Sesión"
                 >
-                  <LogOut size={18} className="group-hover:scale-110 transition-transform" />
+                  <LogOut size={16} className="sm:hidden group-hover:scale-110 transition-transform" />
+                  <LogOut size={18} className="hidden sm:block group-hover:scale-110 transition-transform" />
                 </button>
               </div>
             </div>

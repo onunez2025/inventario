@@ -135,66 +135,119 @@ export const PhysicalCountsTable: React.FC<PhysicalCountsTableProps> = ({ invent
             <p className="text-gray-500 font-medium">No hay conteos registrados aún</p>
           </div>
         ) : (
-           <table className="w-full text-left text-sm">
-              <thead className="bg-white text-gray-400 uppercase tracking-widest text-[10px] font-bold sticky top-0 shadow-sm z-10">
-                <tr>
-                  <th className="px-6 py-4 rounded-tl-2xl">Fecha / Hora</th>
-                  <th className="px-6 py-4">Usuario</th>
-                  <th className="px-6 py-4">Artículo</th>
-                  <th className="px-6 py-4 text-center">Detalle</th>
-                  <th className="px-6 py-4 text-right rounded-tr-2xl">Cantidad</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {filteredCounts.map((record) => (
-                  <tr key={record.id} className="hover:bg-white transition-colors group">
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-gray-800">{new Date(record.created_at).toLocaleDateString()}</p>
-                      <p className="text-[10px] text-gray-400 font-medium">{new Date(record.created_at).toLocaleTimeString()}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                         <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
-                           <User size={12} />
-                         </div>
-                         <span className="font-medium text-gray-700">{record.perfiles?.nombre || 'Desconocido'}</span>
+          <>
+            {/* Mobile Card View (Deck) */}
+            <div className="block sm:hidden space-y-4 p-4">
+              {filteredCounts.map((record) => (
+                <div key={record.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                        <User size={14} />
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="font-bold text-gray-800 line-clamp-1">{record.articulos?.nombre}</p>
-                      <p className="text-[10px] uppercase font-mono tracking-tighter text-gray-400">{record.articulos?.sku}</p>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                       <div className="flex items-center justify-center gap-2">
-                          {record.observacion && (
-                            <div className="group/tooltip relative">
-                               <MessageSquare size={16} className="text-amber-500" />
-                               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block w-48 bg-gray-800 text-white text-[10px] p-2 rounded-lg z-20">
-                                 {record.observacion}
-                               </div>
-                            </div>
-                          )}
-                          {record.foto_url && (
-                             <a 
-                               href={`${supabase.storage.from('evidencias').getPublicUrl(record.foto_url).data.publicUrl}`} 
-                               target="_blank" 
-                               rel="noreferrer"
-                               className="text-primary hover:scale-110 transition-transform"
-                             >
-                                <ImageIcon size={16} />
-                             </a>
-                          )}
-                       </div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                       <span className="inline-block px-3 py-1 bg-gray-100 rounded-lg font-display font-black text-gray-800">
-                         {record.cantidad_fisica}
-                       </span>
-                    </td>
+                      <div>
+                        <p className="text-[10px] font-bold text-gray-800 leading-tight">{record.perfiles?.nombre || 'Desconocido'}</p>
+                        <p className="text-[9px] text-gray-400 font-medium">{new Date(record.created_at).toLocaleString()}</p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <span className="inline-block px-3 py-1 bg-gray-100 rounded-lg font-display font-black text-gray-800 text-sm">
+                        {record.cantidad_fisica}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                    <p className="font-bold text-gray-800 text-xs line-clamp-1">{record.articulos?.nombre}</p>
+                    <p className="text-[9px] uppercase font-mono tracking-tighter text-gray-400">{record.articulos?.sku}</p>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-3 pt-1">
+                    {record.observacion && (
+                      <div className="flex items-center gap-1.5 text-amber-600">
+                        <MessageSquare size={14} />
+                        <span className="text-[10px] font-medium truncate max-w-[150px]">{record.observacion}</span>
+                      </div>
+                    )}
+                    {record.foto_url && (
+                      <a 
+                        href={`${supabase.storage.from('evidencias').getPublicUrl(record.foto_url).data.publicUrl}`} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="flex items-center gap-1 px-2 py-1 bg-primary/5 text-primary rounded-lg text-[10px] font-bold"
+                      >
+                        <ImageIcon size={12} /> Ver Foto
+                      </a>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Tablet/Desktop Table View */}
+            <div className="hidden sm:block">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-white text-gray-400 uppercase tracking-widest text-[10px] font-bold sticky top-0 shadow-sm z-10">
+                  <tr>
+                    <th className="px-6 py-4 rounded-tl-2xl">Fecha / Hora</th>
+                    <th className="px-6 py-4">Usuario</th>
+                    <th className="px-6 py-4">Artículo</th>
+                    <th className="px-6 py-4 text-center">Detalle</th>
+                    <th className="px-6 py-4 text-right rounded-tr-2xl">Cantidad</th>
                   </tr>
-                ))}
-              </tbody>
-           </table>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {filteredCounts.map((record) => (
+                    <tr key={record.id} className="hover:bg-white transition-colors group">
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-gray-800">{new Date(record.created_at).toLocaleDateString()}</p>
+                        <p className="text-[10px] text-gray-400 font-medium">{new Date(record.created_at).toLocaleTimeString()}</p>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                           <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                             <User size={12} />
+                           </div>
+                           <span className="font-medium text-gray-700">{record.perfiles?.nombre || 'Desconocido'}</span>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <p className="font-bold text-gray-800 line-clamp-1">{record.articulos?.nombre}</p>
+                        <p className="text-[10px] uppercase font-mono tracking-tighter text-gray-400">{record.articulos?.sku}</p>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                         <div className="flex items-center justify-center gap-2">
+                            {record.observacion && (
+                              <div className="group/tooltip relative">
+                                 <MessageSquare size={16} className="text-amber-500" />
+                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover/tooltip:block w-48 bg-gray-800 text-white text-[10px] p-2 rounded-lg z-20">
+                                   {record.observacion}
+                                 </div>
+                              </div>
+                            )}
+                            {record.foto_url && (
+                               <a 
+                                 href={`${supabase.storage.from('evidencias').getPublicUrl(record.foto_url).data.publicUrl}`} 
+                                 target="_blank" 
+                                 rel="noreferrer"
+                                 className="text-primary hover:scale-110 transition-transform"
+                               >
+                                  <ImageIcon size={16} />
+                               </a>
+                            )}
+                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                         <span className="inline-block px-3 py-1 bg-gray-100 rounded-lg font-display font-black text-gray-800">
+                           {record.cantidad_fisica}
+                         </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
     </div>

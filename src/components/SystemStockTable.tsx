@@ -111,28 +111,57 @@ export const SystemStockTable: React.FC<SystemStockTableProps> = ({ inventarioId
               <p className="text-gray-400 text-sm font-medium">No se encontraron registros de stock</p>
             </div>
           ) : (
-             <table className="w-full text-left text-sm">
-                <thead className="bg-white text-gray-400 uppercase tracking-widest text-[10px] font-bold sticky top-0 shadow-sm">
-                  <tr>
-                    <th className="px-6 py-4 rounded-tl-2xl">SKU</th>
-                    <th className="px-6 py-4">Artículo</th>
-                    <th className="px-6 py-4 text-right rounded-tr-2xl">Stock Sistema</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredRecords.map((record) => (
-                    <tr key={record.id} className="hover:bg-white transition-colors">
-                      <td className="px-6 py-4 font-mono font-bold text-gray-600">{record.sku}</td>
-                      <td className="px-6 py-4 font-medium text-gray-800">
-                        {record.articulos ? record.articulos.nombre : <span className="text-red-400 text-xs italic">SKU no maestro</span>}
-                      </td>
-                      <td className="px-6 py-4 text-right font-display font-bold text-gray-800">
+            <>
+              {/* Mobile Card View (Deck) */}
+              <div className="block sm:hidden space-y-3 p-4">
+                {filteredRecords.map((record) => (
+                  <div key={record.id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-center group">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[9px] font-mono font-bold bg-gray-100 px-1.5 py-0.5 rounded text-gray-500 uppercase tracking-tighter">
+                          {record.sku}
+                        </span>
+                      </div>
+                      <p className="font-bold text-gray-800 text-sm truncate">
+                        {record.articulos ? record.articulos.nombre : <span className="text-red-400 italic">SKU no maestro</span>}
+                      </p>
+                    </div>
+                    <div className="pl-4 text-right">
+                      <p className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-none mb-1">Stock</p>
+                      <p className="text-xl font-display font-black text-primary leading-none">
                         {record.stock_sistema}
-                      </td>
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Tablet/Desktop Table View */}
+              <div className="hidden sm:block">
+                <table className="w-full text-left text-sm">
+                  <thead className="bg-white text-gray-400 uppercase tracking-widest text-[10px] font-bold sticky top-0 shadow-sm">
+                    <tr>
+                      <th className="px-6 py-4 rounded-tl-2xl">SKU</th>
+                      <th className="px-6 py-4">Artículo</th>
+                      <th className="px-6 py-4 text-right rounded-tr-2xl">Stock Sistema</th>
                     </tr>
-                  ))}
-                </tbody>
-             </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {filteredRecords.map((record) => (
+                      <tr key={record.id} className="hover:bg-white transition-colors">
+                        <td className="px-6 py-4 font-mono font-bold text-gray-600">{record.sku}</td>
+                        <td className="px-6 py-4 font-medium text-gray-800">
+                          {record.articulos ? record.articulos.nombre : <span className="text-red-400 text-xs italic">SKU no maestro</span>}
+                        </td>
+                        <td className="px-6 py-4 text-right font-display font-bold text-gray-800">
+                          {record.stock_sistema}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </div>
       </div>
