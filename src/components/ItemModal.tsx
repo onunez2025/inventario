@@ -85,7 +85,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ articulo, initialSku, onCl
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 pb-32">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200">
         <div className="bg-primary p-6 text-white flex justify-between items-center">
           <div className="flex items-center gap-3">

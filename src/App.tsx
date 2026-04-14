@@ -127,11 +127,11 @@ const App: React.FC = () => {
       {(view === 'master' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador')) ? (
         <ItemMaster onBack={() => setView('status')} />
       ) : view === 'users' && (perfil?.rol === 'administrador') ? (
-        <div className="flex-1 flex flex-col bg-slate-950">
+        <div className="flex-1 flex flex-col bg-surface">
            {/* Header duplicado para vista master/users para consistencia */}
-           <header className="bg-slate-900/50 backdrop-blur-md p-4 text-white border-b border-white/5 sticky top-0 z-20">
+           <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-20">
               <div className="max-w-4xl mx-auto flex justify-between items-center">
-                <button onClick={() => setView('status')} className="text-sm font-bold text-primary flex items-center gap-2">
+                <button onClick={() => setView('status')} className="text-sm font-bold text-blue-100 flex items-center gap-2 hover:text-white transition-colors">
                   ← Volver
                 </button>
                 <h1 className="text-xl font-display font-black tracking-tight">Administración</h1>
@@ -286,43 +286,45 @@ const App: React.FC = () => {
 
       {/* Floating Bottom Nav for Mobile - Persistent */}
       {!showScanner && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-outline-variant/30 px-4 py-3 pb-8 flex justify-between items-center z-[140]">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-4 pt-3 pb-10 flex justify-between items-end z-[140] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
         <button 
           onClick={() => setView('status')}
-          className={`flex flex-col items-center flex-1 transition-all ${view === 'status' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
+          className={`flex flex-col items-center flex-1 pb-2 transition-all ${view === 'status' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
         >
           <TrendingDown size={22} />
-          <span className="text-[9px] uppercase mt-1">Status</span>
+          <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Status</span>
         </button>
         
-        <button 
-          onClick={() => setShowScanner(true)}
-          className="bg-primary p-4 rounded-[1.5rem] -mt-12 shadow-2xl shadow-primary/40 border-[6px] border-white text-white active:scale-90 transition-all hover:bg-primary-container z-10"
-        >
-          <Camera size={26} />
-        </button>
+        <div className="flex-1 flex justify-center pb-6">
+          <button 
+            onClick={() => setShowScanner(true)}
+            className="bg-primary p-5 rounded-[2rem] -mb-4 shadow-2xl shadow-primary/40 border-[8px] border-surface text-white active:scale-95 transition-all hover:bg-primary-container z-10"
+          >
+            <Camera size={28} />
+          </button>
+        </div>
         
         {/* Solo Supervisores/Admins ven el Maestro y Usuarios */}
-        {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
-          <>
+        {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') ? (
+          <div className="flex-[2] flex justify-around pb-2">
             <button 
               onClick={() => setView('master')}
-              className={`flex flex-col items-center flex-1 transition-all ${view === 'master' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
+              className={`flex flex-col items-center transition-all ${view === 'master' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
             >
               <Database size={22} />
-              <span className="text-[9px] uppercase mt-1">Maestro</span>
+              <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Maestro</span>
             </button>
             <button 
               onClick={() => setView('users')}
-              className={`flex flex-col items-center flex-1 transition-all ${view === 'users' ? 'text-primary scale-110 font-bold' : 'text-gray-400'}`}
+              className={`flex flex-col items-center transition-all ${view === 'users' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
             >
               <Users size={22} />
-              <span className="text-[9px] uppercase mt-1">Usuarios</span>
+              <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Usuarios</span>
             </button>
-          </>
+          </div>
+        ) : (
+          <div className="flex-1"></div>
         )}
-
-        {/* Botón de Perfil en Nav para Mobile - ELIMINADO SEGÚN SOLICITUD */}
         </nav>
       )}
 

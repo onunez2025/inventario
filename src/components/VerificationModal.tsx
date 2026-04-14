@@ -46,8 +46,8 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ articulo, 
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-300">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 pb-20 sm:pb-4">
+      <div className="bg-white ...">
         <div className="p-6 space-y-6">
           <div className="flex justify-between items-start">
             <div>
