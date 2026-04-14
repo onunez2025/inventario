@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, ShieldCheck, AlertCircle } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+import { supabase } from '../lib/supabase';
 
 interface SupervisorAuthModalProps {
   isOpen: boolean;

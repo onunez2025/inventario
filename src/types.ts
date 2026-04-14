@@ -6,6 +6,7 @@ export interface Articulo {
   costo_unitario: number;
   stock_sistema: number;
   categoria?: string;
+  marca?: string;
 }
 
 export interface Inventario {

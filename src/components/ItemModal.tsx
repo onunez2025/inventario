@@ -11,7 +11,7 @@ interface ItemModalProps {
   onSave: () => void;
 }
 
-export const ItemModal: React.FC<ItemModalProps> = ({ articulo, onClose, onSave }) => {
+export const ItemModal: React.FC<ItemModalProps> = ({ articulo, initialSku, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     sku: articulo?.sku || initialSku || '',
     nombre: articulo?.nombre || '',
