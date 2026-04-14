@@ -122,7 +122,7 @@ export const SystemStockTable: React.FC<SystemStockTableProps> = ({ inventarioId
                           {record.sku}
                         </span>
                       </div>
-                      <p className="font-bold text-gray-800 text-sm truncate">
+                      <p className="font-bold text-gray-800 text-sm">
                         {record.articulos ? record.articulos.nombre : <span className="text-red-400 italic">SKU no maestro</span>}
                       </p>
                     </div>

@@ -395,7 +395,7 @@ const App: React.FC = () => {
                               <Package size={24} />
                             </div>
                             <div className="max-w-[180px]">
-                              <p className="text-sm font-bold text-gray-800 truncate">{record.articulo_nombre}</p>
+                              <p className="text-sm font-bold text-gray-800">{record.articulo_nombre}</p>
                               <p className="text-[10px] text-gray-400 font-mono uppercase tracking-tighter">{record.sku}</p>
                             </div>
                           </div>

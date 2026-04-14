@@ -184,7 +184,7 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
                 <Package size={24} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-bold text-sm truncate">{item.nombre}</p>
+                <p className="font-bold text-sm">{item.nombre}</p>
                 <div className="flex gap-2 mt-1">
                   <p className="text-[10px] text-on-surface/50 uppercase tracking-widest font-bold">SKU: {item.sku}</p>
                   {item.categoria && <p className="text-[9px] bg-secondary/10 text-secondary px-1.5 rounded">{item.categoria}</p>}

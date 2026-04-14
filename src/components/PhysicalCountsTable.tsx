@@ -158,7 +158,7 @@ export const PhysicalCountsTable: React.FC<PhysicalCountsTableProps> = ({ invent
                   </div>
                   
                   <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
-                    <p className="font-bold text-gray-800 text-xs line-clamp-1">{record.articulos?.nombre}</p>
+                    <p className="font-bold text-gray-800 text-xs">{record.articulos?.nombre}</p>
                     <p className="text-[9px] uppercase font-mono tracking-tighter text-gray-400">{record.articulos?.sku}</p>
                   </div>
 
