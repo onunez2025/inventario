@@ -340,52 +340,64 @@ const App: React.FC = () => {
 
       {/* Floating Bottom Nav for Mobile - Persistent */}
       {!showScanner && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-gray-100 px-4 pt-3 pb-10 flex justify-between items-end z-[140] shadow-[0_-10px_40px_rgba(0,0,0,0.05)]">
-        <button 
-          onClick={() => setView('status')}
-          className={`flex flex-col items-center flex-1 pb-2 transition-all ${view === 'status' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
-        >
-          <TrendingDown size={22} />
-          <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Status</span>
-        </button>
-        
-        <div className="flex-1 flex justify-center pb-6">
-          <button 
-            onClick={() => setShowScanner(true)}
-            className="bg-primary p-5 rounded-[2rem] -mb-4 shadow-2xl shadow-primary/40 border-[8px] border-surface text-white active:scale-95 transition-all hover:bg-primary-container z-10"
-          >
-            <Camera size={28} />
-          </button>
-        </div>
-        
-        {/* Solo Supervisores/Admins ven el Maestro y Usuarios */}
-        {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') ? (
-          <div className="flex-[2] flex justify-around pb-2">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-100 pb-8 flex items-end z-[140] shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
+          {/* Lado Izquierdo: Acciones Principales */}
+          <div className="flex-1 flex justify-around items-center pb-2 px-2">
             <button 
-              onClick={() => setView('master')}
-              className={`flex flex-col items-center transition-all ${view === 'master' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
+              onClick={() => setView('status')}
+              className={`flex flex-col items-center flex-1 transition-all ${view === 'status' ? 'text-primary scale-110 font-black' : 'text-gray-400 font-medium'}`}
             >
-              <Database size={22} />
-              <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Maestro</span>
+              <TrendingDown size={22} />
+              <span className="text-[10px] uppercase mt-1.5 tracking-tighter">Status</span>
             </button>
+            
+            {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+              <button 
+                onClick={() => setView('master')}
+                className={`flex flex-col items-center flex-1 transition-all ${view === 'master' ? 'text-primary scale-110 font-black' : 'text-gray-400 font-medium'}`}
+              >
+                <Database size={22} />
+                <span className="text-[10px] uppercase mt-1.5 tracking-tighter">Maestro</span>
+              </button>
+            )}
+          </div>
+
+          {/* Centro: Cámara (Eje Central) */}
+          <div className="flex-none w-24 flex justify-center pb-6">
             <button 
-              onClick={() => setView('inventory')}
-              className={`flex flex-col items-center transition-all ${view === 'inventory' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
+              onClick={() => setShowScanner(true)}
+              className="bg-primary p-5 rounded-[2.5rem] -mb-4 shadow-[0_15px_30px_rgba(0,49,120,0.3)] border-[8px] border-surface text-white active:scale-90 transition-all hover:bg-primary-container z-10 relative group"
             >
-              <Calendar size={22} />
-              <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Programar</span>
-            </button>
-            <button 
-              onClick={() => setView('users')}
-              className={`flex flex-col items-center transition-all ${view === 'users' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
-            >
-              <Users size={22} />
-              <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Usuarios</span>
+              <div className="absolute inset-0 bg-white/20 rounded-full scale-0 group-active:scale-100 transition-transform duration-300"></div>
+              <Camera size={30} className="relative z-10" />
             </button>
           </div>
-        ) : (
-          <div className="flex-1"></div>
-        )}
+
+          {/* Lado Derecho: Gestión y Configuración */}
+          <div className="flex-1 flex justify-around items-center pb-2 px-2">
+            {(perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') && (
+              <button 
+                onClick={() => setView('inventory')}
+                className={`flex flex-col items-center flex-1 transition-all ${view === 'inventory' ? 'text-primary scale-110 font-black' : 'text-gray-400 font-medium'}`}
+              >
+                <Calendar size={22} />
+                <span className="text-[10px] uppercase mt-1.5 tracking-tighter">Programar</span>
+              </button>
+            )}
+
+            {perfil?.rol === 'administrador' ? (
+              <button 
+                onClick={() => setView('users')}
+                className={`flex flex-col items-center flex-1 transition-all ${view === 'users' ? 'text-primary scale-110 font-black' : 'text-gray-400 font-medium'}`}
+              >
+                <Users size={22} />
+                <span className="text-[10px] uppercase mt-1.5 tracking-tighter">Usuarios</span>
+              </button>
+            ) : (
+              /* Espaciador para mantener la cámara centrada si no hay botón de Usuarios */
+              <div className="flex-1"></div>
+            )}
+          </div>
         </nav>
       )}
 
