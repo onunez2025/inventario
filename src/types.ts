@@ -39,6 +39,8 @@ export interface Perfil {
 }
 
 export interface ConciliacionRecord {
+  inventario_id: string;
+  tienda_nombre: string;
   articulo_id: string;
   sku: string;
   articulo_nombre: string;

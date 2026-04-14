@@ -11,13 +11,19 @@ import SupervisorAuthModal from './components/SupervisorAuthModal';
 import { ItemModal } from './components/ItemModal';
 import { ProfileModal } from './components/ProfileModal';
 import { UserManagement } from './components/UserManagement';
+import { InventorySessions } from './components/InventorySessions';
+import { Calendar } from 'lucide-react';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [data, setData] = useState<ConciliacionRecord[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<'status' | 'master' | 'users'>('status');
+  const [view, setView] = useState<'status' | 'master' | 'users' | 'inventory'>('status');
+  const [activeInventory, setActiveInventory] = useState<Inventario | null>(() => {
+    const saved = localStorage.getItem('activeInventory');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [showScanner, setShowScanner] = useState(false);
   const [selectedArticulo, setSelectedArticulo] = useState<Articulo | null>(null);
   const [showItemModal, setShowItemModal] = useState(false);
@@ -64,17 +70,30 @@ const App: React.FC = () => {
     if (session && view === 'status') {
       fetchData();
     }
-  }, [session, view]);
+  }, [session, view, activeInventory?.id]);
 
   const fetchData = async () => {
+    if (!activeInventory) {
+      setData([]);
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     const { data: records, error } = await supabase
       .from('vista_conciliacion')
-      .select('*');
+      .select('*')
+      .eq('inventario_id', activeInventory.id);
 
     if (error) console.error('Error fetching data:', error);
     else setData(records || []);
     setLoading(false);
+  };
+
+  const handleSelectInventory = (inv: Inventario) => {
+    setActiveInventory(inv);
+    localStorage.setItem('activeInventory', JSON.stringify(inv));
+    setView('status');
   };
 
   const handleLogout = async () => {
@@ -126,6 +145,24 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-surface flex flex-col">
       {(view === 'master' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador')) ? (
         <ItemMaster onBack={() => setView('status')} />
+      ) : view === 'inventory' && (perfil?.rol === 'supervisor' || perfil?.rol === 'administrador') ? (
+        <div className="flex-1 flex flex-col bg-surface">
+           <header className="bg-primary-container p-4 text-white shadow-lg sticky top-0 z-20">
+              <div className="max-w-4xl mx-auto flex justify-between items-center">
+                <button onClick={() => setView('status')} className="text-sm font-bold text-blue-100 flex items-center gap-2 hover:text-white transition-colors">
+                  ← Volver
+                </button>
+                <h1 className="text-xl font-display font-black tracking-tight">Sesiones de Inventario</h1>
+                <div className="w-16"></div>
+              </div>
+           </header>
+           <div className="flex-1 overflow-auto">
+              <InventorySessions 
+                activeInventoryId={activeInventory?.id || null} 
+                onSelectInventory={handleSelectInventory} 
+              />
+           </div>
+        </div>
       ) : view === 'users' && (perfil?.rol === 'administrador') ? (
         <div className="flex-1 flex flex-col bg-surface">
            {/* Header duplicado para vista master/users para consistencia */}
@@ -134,7 +171,7 @@ const App: React.FC = () => {
                 <button onClick={() => setView('status')} className="text-sm font-bold text-blue-100 flex items-center gap-2 hover:text-white transition-colors">
                   ← Volver
                 </button>
-                <h1 className="text-xl font-display font-black tracking-tight">Administración</h1>
+                <h1 className="text-xl font-display font-black tracking-tight">Administración de Usuarios</h1>
                 <div className="w-16"></div>
               </div>
            </header>
@@ -201,7 +238,7 @@ const App: React.FC = () => {
               <div className="flex justify-between items-end mb-4 relative z-10">
                 <div>
                   <h3 className="text-lg font-bold">Progreso Toma Física</h3>
-                  <p className="text-xs text-blue-100">Tienda: Lima Central</p>
+                  <p className="text-xs text-blue-100">Tienda: {activeInventory?.tienda_nombre || 'Seleccione un Inventario'}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-3xl font-display font-black">{Math.round((progreso.completados / progreso.total) * 100)}<span className="text-sm ml-1">%</span></p>
@@ -315,6 +352,13 @@ const App: React.FC = () => {
               <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Maestro</span>
             </button>
             <button 
+              onClick={() => setView('inventory')}
+              className={`flex flex-col items-center transition-all ${view === 'inventory' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
+            >
+              <Calendar size={22} />
+              <span className="text-[9px] uppercase mt-1.5 font-bold tracking-tighter">Programar</span>
+            </button>
+            <button 
               onClick={() => setView('users')}
               className={`flex flex-col items-center transition-all ${view === 'users' ? 'text-primary scale-110 font-black' : 'text-gray-400'}`}
             >
@@ -336,9 +380,11 @@ const App: React.FC = () => {
         />
       )}
 
-      {selectedArticulo && (
+       {selectedArticulo && (
         <VerificationModal 
           articulo={selectedArticulo} 
+          inventarioId={activeInventory?.id || ''}
+          usuarioId={session?.user.id || ''}
           onClose={() => setSelectedArticulo(null)}
           onSave={() => {
             setSelectedArticulo(null);

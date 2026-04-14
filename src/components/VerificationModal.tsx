@@ -5,11 +5,19 @@ import { supabase } from '../lib/supabase';
 
 interface VerificationModalProps {
   articulo: Articulo;
+  inventarioId: string;
+  usuarioId: string;
   onClose: () => void;
   onSave: () => void;
 }
 
-export const VerificationModal: React.FC<VerificationModalProps> = ({ articulo, onClose, onSave }) => {
+export const VerificationModal: React.FC<VerificationModalProps> = ({ 
+  articulo, 
+  inventarioId,
+  usuarioId,
+  onClose, 
+  onSave 
+}) => {
   const [conteo, setConteo] = useState<number | string>('');
   const [observacion, setObservacion] = useState('');
   const [loading, setLoading] = useState(false);
@@ -19,6 +27,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ articulo, 
   const impactoEconomico = diferencia * articulo.costo_unitario;
 
   const handleSave = async () => {
+    if (!inventarioId) {
+      alert('Error: No hay un inventario activo seleccionado.');
+      return;
+    }
+
     setLoading(true);
     let fotoUrl = '';
 
@@ -37,11 +50,15 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({ articulo, 
       cantidad_fisica: Number(conteo),
       observacion,
       foto_url: fotoUrl,
-      // Note: In a real app, you'd get the inventario_id and usuario_id from context/state
-      inventario_id: 'eb92c81a-6d6c-4b5a-9b4a-1085d168b165' 
+      inventario_id: inventarioId,
+      usuario_id: usuarioId
     });
 
     if (!error) onSave();
+    else {
+      console.error('Error saving count:', error);
+      alert('Error al guardar el conteo');
+    }
     setLoading(false);
   };
 
