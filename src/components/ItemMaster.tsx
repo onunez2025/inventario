@@ -116,7 +116,7 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
         <h2 className="text-xl">Maestro de Artículos</h2>
       </header>
 
-      <div className="px-6 space-y-4 flex-1 overflow-hidden flex flex-col">
+      <div className="px-4 sm:px-6 space-y-4 flex-1 overflow-hidden flex flex-col">
         <div className="relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface/30" size={18} />
           <input 

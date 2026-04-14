@@ -9,7 +9,7 @@ interface InventoryHeaderProps {
 
 export const InventoryHeader: React.FC<InventoryHeaderProps> = ({ activeInventory, onChangeInventory }) => {
   return (
-    <div className="bg-white rounded-[2rem] p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-4">
       <div className="flex items-center gap-4">
         <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-inner">
           <MapPin size={28} />
