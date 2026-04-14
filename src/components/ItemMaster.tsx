@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Articulo } from '../types';
-import { Search, Plus, Filter, MoreVertical, Package, ArrowLeft, Trash2, Edit2 } from 'lucide-react';
+import { Search, Plus, Filter, MoreVertical, Package, ArrowLeft, Trash2, Edit2, Upload, Loader2, FileSpreadsheet } from 'lucide-react';
 import { ItemModal } from './ItemModal';
 
 interface ItemMasterProps {
@@ -18,6 +18,62 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
   const [editingArticulo, setEditingArticulo] = useState<Articulo | undefined>(undefined);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>('Todas');
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [importLoading, setImportLoading] = useState(false);
+
+  const handleDownloadTemplate = () => {
+    const csvContent = "data:text/csv;charset=utf-8,sku,nombre,categoria,costo_unitario\nSKU-123,Producto Ejemplo,Abarrotes,10.50";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "plantilla_maestro_articulos.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setImportLoading(true);
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+        
+        let startIndex = 0;
+        if (lines[0].toLowerCase().includes('sku')) startIndex = 1;
+
+        const records = lines.slice(startIndex).map(line => {
+          const p = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+          const sku = p[0]?.replace(/^"|"$/g, '').trim();
+          const nombre = p[1]?.replace(/^"|"$/g, '').trim();
+          const categoria = p[2]?.replace(/^"|"$/g, '').trim() || '';
+          const costo_unitario = parseFloat(p[3]?.replace(/^"|"$/g, '').trim()) || 0;
+          if (!sku || !nombre) throw new Error('Formato inválido: falta SKU o nombre');
+          return { sku, nombre, categoria, costo_unitario, stock_sistema: 0 };
+        });
+
+        if (records.length === 0) throw new Error('Archivo vacío');
+
+        const { error: insertError } = await supabase.from('articulos').upsert(records, { onConflict: 'sku' });
+        if (insertError) throw new Error(insertError.message);
+
+        alert(`Se importaron ${records.length} artículos correctamente`);
+        fetchArticulos();
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } catch (err: any) {
+        alert('Error al procesar el archivo: ' + err.message);
+      } finally {
+        setImportLoading(false);
+      }
+    };
+    reader.onerror = () => { alert('Error al leer el archivo'); setImportLoading(false); };
+    reader.readAsText(file);
+  };
 
   useEffect(() => {
     fetchArticulos();
@@ -84,6 +140,28 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
              <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface/50" />
            </div>
            
+           <input 
+             type="file" 
+             accept=".csv"
+             onChange={handleFileUpload}
+             ref={fileInputRef}
+             className="hidden"
+             id="csv-upload-articulos"
+           />
+           <button 
+             onClick={() => fileInputRef.current?.click()}
+             disabled={importLoading}
+             className="bg-secondary text-white px-4 py-2 rounded-full text-xs font-bold shadow-sm flex items-center gap-2 flex-shrink-0"
+           >
+             {importLoading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />} Importar
+           </button>
+           <button 
+             onClick={handleDownloadTemplate}
+             className="bg-blue-50 text-blue-600 px-4 py-2 rounded-full text-xs font-bold shadow-sm flex items-center gap-2 flex-shrink-0 border border-blue-100 disabled:opacity-50"
+           >
+             <FileSpreadsheet size={14} /> Plantilla
+           </button>
+
            <button 
              onClick={() => { setEditingArticulo(undefined); setShowModal(true); }}
              className="bg-primary text-white px-4 py-2 rounded-full text-xs font-bold shadow-sm flex items-center gap-2 flex-shrink-0"

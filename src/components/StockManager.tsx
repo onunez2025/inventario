@@ -22,6 +22,17 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
   const [success, setSuccess] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const handleDownloadTemplate = () => {
+    const csvContent = "data:text/csv;charset=utf-8,sku,cantidad\nEJEMPLO-001,100\nEJEMPLO-002,50";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "plantilla_stock_sistema.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleClearStock = async () => {
     if (!confirm('¿Estás seguro de borrar TODO el stock de sistema para esta sesión? Esta acción no se puede deshacer.')) {
       return;
@@ -122,7 +133,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Import Button */}
         <div className="relative">
           <input 
@@ -142,6 +153,16 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
             Importar CSV
           </button>
         </div>
+
+        {/* Download Template Button */}
+        <button 
+          onClick={handleDownloadTemplate}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-blue-50 text-blue-600 py-4 rounded-2xl font-bold border border-blue-100 hover:bg-blue-100 transition-all active:scale-95 disabled:opacity-50"
+        >
+          <FileSpreadsheet size={20} />
+          Descargar Plantilla
+        </button>
 
         {/* Clear Button */}
         <button 
