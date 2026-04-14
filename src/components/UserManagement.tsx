@@ -3,21 +3,18 @@ import { supabase } from '../lib/supabase';
 import { 
   Users, 
   Shield, 
-  UserPlus, 
   Search, 
   Edit2, 
   Check, 
   X, 
   Loader2, 
   AlertCircle,
-  MoreVertical,
-  Trash2,
   Lock
 } from 'lucide-react';
-import { UserProfile, UserRole } from '../types';
+import type { Perfil, UserRole } from '../types';
 
 export const UserManagement: React.FC = () => {
-  const [perfiles, setPerfiles] = useState<UserProfile[]>([]);
+  const [perfiles, setPerfiles] = useState<Perfil[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -48,7 +45,7 @@ export const UserManagement: React.FC = () => {
     setLoading(false);
   };
 
-  const handleEdit = (perfil: UserProfile) => {
+  const handleEdit = (perfil: Perfil) => {
     setEditingId(perfil.id);
     setEditForm({
       nombre: perfil.nombre || '',
