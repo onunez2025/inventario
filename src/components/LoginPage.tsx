@@ -52,11 +52,13 @@ export const LoginPage: React.FC = () => {
 
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-outline-variant/10 overflow-hidden relative z-10 animate-in zoom-in-95 duration-500">
         <div className="bg-primary p-10 text-white text-center relative">
-          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6 backdrop-blur-md rotate-12 shadow-inner">
-             <LogIn size={32} />
+          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-black/20 overflow-hidden transform hover:scale-110 transition-transform">
+             <img src="/logo.png" alt="Invent-IA Logo" className="w-16 h-16 object-contain" />
           </div>
-          <h1 className="text-3xl font-display font-bold tracking-tight mb-2">Inventory Curator</h1>
-          <p className="text-primary-fixed/60 text-sm font-medium">Gestión Profesional de Inventarios</p>
+          <h1 className="text-4xl font-display font-black tracking-tighter mb-2">
+            Invent<span className="text-secondary">-IA</span>
+          </h1>
+          <p className="text-blue-100/70 text-sm font-bold uppercase tracking-widest">Gestión Inteligente de Activos</p>
         </div>
 
         <div className="p-10 space-y-6">

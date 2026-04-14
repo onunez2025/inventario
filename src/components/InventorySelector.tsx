@@ -48,8 +48,8 @@ export const InventorySelector: React.FC<InventorySelectorProps> = ({ onSelect }
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center space-y-2">
-        <div className="w-16 h-16 bg-primary/10 rounded-[2rem] flex items-center justify-center mx-auto mb-4">
-          <PackageSearch className="text-primary" size={32} />
+        <div className="w-20 h-20 bg-white rounded-[2rem] flex items-center justify-center mx-auto mb-4 shadow-xl shadow-black/5 overflow-hidden transform rotate-3">
+          <img src="/logo.png" alt="Invent-IA" className="w-14 h-14 object-contain" />
         </div>
         <h2 className="text-2xl font-display font-black text-gray-800">Seleccionar Inventario</h2>
         <p className="text-sm text-gray-500">Para comenzar, selecciona la tienda o almacén donde realizarás el conteo.</p>

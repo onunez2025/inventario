@@ -268,9 +268,12 @@ const App: React.FC = () => {
           {/* Header */}
           <header className="bg-primary-container px-4 py-3 sm:p-4 text-white shadow-lg sticky top-0 z-50 transition-all">
             <div className="max-w-4xl mx-auto flex justify-between items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-display font-black tracking-tighter text-white flex-shrink-0">
-                Invent<span className="text-secondary">-IA</span>
-              </h1>
+              <div className="flex items-center gap-3">
+                <img src="/logo.png" alt="Invent-IA" className="w-10 h-10 object-contain rounded-xl shadow-lg shadow-black/20" />
+                <h1 className="text-xl sm:text-2xl font-display font-black tracking-tighter text-white flex-shrink-0">
+                  Invent<span className="text-secondary">-IA</span>
+                </h1>
+              </div>
               <div className="flex items-center gap-2 sm:gap-3">
                 <button 
                   onClick={() => setShowProfile(true)}
