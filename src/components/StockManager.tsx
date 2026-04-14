@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import { 
   Database, 
-  Trash2, 
   Upload, 
   AlertCircle, 
   CheckCircle2, 
@@ -33,28 +32,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
     document.body.removeChild(link);
   };
 
-  const handleClearStock = async () => {
-    if (!confirm('¿Estás seguro de borrar TODO el stock de sistema para esta sesión? Esta acción no se puede deshacer.')) {
-      return;
-    }
 
-    setLoading(true);
-    setError(null);
-    setSuccess(null);
-
-    const { error: deleteError } = await supabase
-      .from('inventario_stock_sistema')
-      .delete()
-      .eq('inventario_id', inventarioId);
-
-    if (deleteError) {
-      setError('Error al borrar el stock: ' + deleteError.message);
-    } else {
-      setSuccess('Stock borrado correctamente');
-      onUpdate();
-    }
-    setLoading(false);
-  };
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -133,7 +111,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Import Button */}
         <div className="relative">
           <input 
@@ -164,15 +142,7 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
           Descargar Plantilla
         </button>
 
-        {/* Clear Button */}
-        <button 
-          onClick={handleClearStock}
-          disabled={loading}
-          className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 py-4 rounded-2xl font-bold border border-red-100 hover:bg-red-100 transition-all active:scale-95 disabled:opacity-50"
-        >
-          <Trash2 size={20} />
-          Borrar Stock
-        </button>
+
       </div>
 
       {/* Feedback Messages */}
