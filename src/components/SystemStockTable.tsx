@@ -15,22 +15,48 @@ export const SystemStockTable: React.FC<SystemStockTableProps> = ({ inventarioId
 
   const fetchStock = async () => {
     setLoading(true);
-    // Join with articulos to get the name
     const { data, error } = await supabase
       .from('inventario_stock_sistema')
       .select(`
         id,
         sku,
         stock_sistema,
-        created_at,
-        articulos ( nombre )
+        created_at
       `)
       .eq('inventario_id', inventarioId)
       .order('created_at', { ascending: false })
       .limit(10000);
 
-    if (!error && data) {
-      setStockRecords(data);
+    if (error) {
+      console.error(error);
+      setLoading(false);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const skusToFetch = [...new Set(data.map(d => d.sku))];
+      const articulosMap = new Map<string, string>();
+      
+      const chunkSize = 200;
+      for (let i = 0; i < skusToFetch.length; i += chunkSize) {
+        const chunk = skusToFetch.slice(i, i + chunkSize);
+        const { data: articulosData } = await supabase
+          .from('articulos')
+          .select('sku, nombre')
+          .in('sku', chunk);
+          
+        if (articulosData) {
+          articulosData.forEach(a => articulosMap.set(a.sku, a.nombre));
+        }
+      }
+
+      const enrichedData = data.map(d => ({
+        ...d,
+        articulos: articulosMap.has(d.sku) ? { nombre: articulosMap.get(d.sku) } : null
+      }));
+      setStockRecords(enrichedData);
+    } else {
+      setStockRecords([]);
     }
     setLoading(false);
   };
