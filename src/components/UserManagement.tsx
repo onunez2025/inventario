@@ -19,7 +19,12 @@ import type { Perfil, UserRole } from '../types';
 import { RolePermissions } from './RolePermissions';
 
 
-export const UserManagement: React.FC = () => {
+interface UserManagementProps {
+  canManageRBAC?: boolean;
+}
+
+export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = false }) => {
+
   const [perfiles, setPerfiles] = useState<Perfil[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -292,7 +297,8 @@ export const UserManagement: React.FC = () => {
       </div>
 
       {/* Matriz de Permisos (RBAC) */}
-      <RolePermissions />
+      <RolePermissions canEdit={canManageRBAC} />
+
 
 
       {/* Modal for Creating User */}

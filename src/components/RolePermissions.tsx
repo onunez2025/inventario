@@ -8,8 +8,12 @@ import {
   Unlock
 } from 'lucide-react';
 
+interface RolePermissionsProps {
+  canEdit?: boolean;
+}
 
-export const RolePermissions: React.FC = () => {
+export const RolePermissions: React.FC<RolePermissionsProps> = ({ canEdit = true }) => {
+
   const [selectedRole, setSelectedRole] = useState<UserRole>('administrador');
   const [rolePerms, setRolePerms] = useState<PermissionKey[]>([]);
   const [loading, setLoading] = useState(false);
@@ -95,7 +99,8 @@ export const RolePermissions: React.FC = () => {
 
               <button
                 onClick={() => handleToggle(def.key)}
-                disabled={loading || isProcessing || (selectedRole === 'administrador' && def.key === 'manage_users')}
+                disabled={loading || isProcessing || !canEdit || (selectedRole === 'administrador' && def.key === 'manage_users')}
+
                 className={`flex-shrink-0 relative w-14 h-8 rounded-full transition-all duration-300 ${isGranted ? 'bg-primary shadow-inner' : 'bg-gray-200'} ${isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:scale-105 active:scale-95'}`}
               >
                 <div 

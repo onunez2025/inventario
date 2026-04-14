@@ -260,7 +260,7 @@ const App: React.FC = () => {
               </div>
            </header>
            <div className="flex-1 overflow-auto">
-              <UserManagement />
+              <UserManagement canManageRBAC={hasPermission('manage_users')} />
            </div>
         </div>
       ) : (
