@@ -20,27 +20,68 @@ export const PhysicalCountsTable: React.FC<PhysicalCountsTableProps> = ({ invent
 
   const fetchCounts = async () => {
     setLoading(true);
-    // Join with articulos to get SKU and Name, and perfiles (or auth.users if available via view)
-    // Supabase allows joins on foreign keys.
     const { data, error } = await supabase
       .from('conteos')
       .select(`
         id,
+        articulo_id,
+        usuario_id,
         cantidad_fisica,
         observacion,
         foto_url,
-        created_at,
-        articulos ( sku, nombre ),
-        perfiles ( nombre )
+        created_at
       `)
       .eq('inventario_id', inventarioId)
       .order('created_at', { ascending: false })
       .limit(10000);
 
-    if (!error && data) {
-      setCounts(data);
-    } else if (error) {
-       console.error("Error fetching counts:", error);
+    if (error) {
+      console.error("Error fetching counts:", error);
+      setLoading(false);
+      return;
+    }
+
+    if (data && data.length > 0) {
+      const articuloIds = [...new Set(data.map(d => d.articulo_id))];
+      const usuarioIds = [...new Set(data.map(d => d.usuario_id))];
+      
+      const articulosMap = new Map<string, any>();
+      const perfilesMap = new Map<string, any>();
+
+      // Fetch Articulos in chunks
+      const articuloChunkSize = 200;
+      for (let i = 0; i < articuloIds.length; i += articuloChunkSize) {
+        const chunk = articuloIds.slice(i, i + articuloChunkSize);
+        const { data: articulosData } = await supabase
+          .from('articulos')
+          .select('id, sku, nombre')
+          .in('id', chunk);
+        if (articulosData) {
+          articulosData.forEach(a => articulosMap.set(a.id, { sku: a.sku, nombre: a.nombre }));
+        }
+      }
+
+      // Fetch Perfiles in chunks
+      const perfilChunkSize = 200;
+      for (let i = 0; i < usuarioIds.length; i += perfilChunkSize) {
+        const chunk = usuarioIds.slice(i, i + perfilChunkSize);
+        const { data: perfilesData } = await supabase
+          .from('perfiles')
+          .select('id, nombre')
+          .in('id', chunk);
+        if (perfilesData) {
+          perfilesData.forEach(p => perfilesMap.set(p.id, { nombre: p.nombre }));
+        }
+      }
+
+      const enrichedData = data.map(d => ({
+        ...d,
+        articulos: articulosMap.get(d.articulo_id) || { sku: 'N/A', nombre: 'Artículo no encontrado' },
+        perfiles: perfilesMap.get(d.usuario_id) || { nombre: 'Desconocido' }
+      }));
+      setCounts(enrichedData);
+    } else {
+      setCounts([]);
     }
     setLoading(false);
   };
