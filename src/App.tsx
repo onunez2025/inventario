@@ -1,8 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
-import type { Articulo, ConciliacionRecord, Perfil } from './types';
-import { BarChart, Bar, XAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { Camera, Package, AlertTriangle, TrendingDown, LogOut, User, Database, Users } from 'lucide-react';
+import type { Articulo, ConciliacionRecord, Perfil, Inventario } from './types';
+import { 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  CartesianGrid, 
+  Tooltip, 
+  ResponsiveContainer, 
+  Cell 
+} from 'recharts';
+import { 
+  Camera, 
+  Package, 
+  AlertTriangle, 
+  TrendingDown, 
+  LogOut, 
+  User, 
+  Database, 
+  Users, 
+  Calendar 
+} from 'lucide-react';
 import { ScannerComponent } from './components/ScannerComponent';
 import { VerificationModal } from './components/VerificationModal';
 import { ItemMaster } from './components/ItemMaster';
@@ -12,7 +30,6 @@ import { ItemModal } from './components/ItemModal';
 import { ProfileModal } from './components/ProfileModal';
 import { UserManagement } from './components/UserManagement';
 import { InventorySessions } from './components/InventorySessions';
-import { Calendar } from 'lucide-react';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
