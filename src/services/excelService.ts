@@ -51,7 +51,7 @@ export const excelService = {
         diferencia: acc.diferencia + dif,
         valor: acc.valor + val
       };
-    }, { sistema: 0, inventario: 0, dferencia: 0, valor: 0 });
+    }, { sistema: 0, inventario: 0, diferencia: 0, valor: 0 });
 
     // ---------------------------------------------------------
     // SHEET 1: RESUMEN EJECUTIVO
