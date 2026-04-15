@@ -1,4 +1,4 @@
-import { jsPDF } from 'jspdf';
+import * as jspdf from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { ConciliacionRecord, Inventario } from '../types';
 
@@ -8,7 +8,9 @@ export const pdfService = {
     data: ConciliacionRecord[],
     signatures: { manager: string; supervisor: string }
   ) {
-    const doc = new jsPDF();
+    // Robust way to get the jsPDF constructor in multiple environments (Vite/Node/Browser)
+    const JsPDFConstructor = (jspdf as any).jsPDF || (jspdf as any).default || jspdf;
+    const doc = new JsPDFConstructor();
     const pageWidth = doc.internal.pageSize.getWidth();
 
     // Header
