@@ -44,7 +44,7 @@ export const pdfService = {
         ['Porcentaje de Avance', `${((itemsCounted / totalItems) * 100).toFixed(2)}%`],
       ],
       theme: 'striped',
-      headStyles: { fillGray: 200, textColor: 0 }
+      headStyles: { fillColor: [200, 200, 200], textColor: 0 }
     });
 
     // Signatures Section
