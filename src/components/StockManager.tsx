@@ -7,7 +7,8 @@ import {
   CheckCircle2, 
   Loader2, 
   FileSpreadsheet,
-  X
+  X,
+  Trash2
 } from 'lucide-react';
 
 interface StockManagerProps {
@@ -30,6 +31,32 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+  };
+
+  const handleDeleteAll = async () => {
+    if (!window.confirm('¿Estás seguro de que deseas borrar TODO el stock cargado en esta sesión? Esta acción no se puede deshacer.')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const { error: deleteError } = await supabase
+        .from('inventario_stock_sistema')
+        .delete()
+        .eq('inventario_id', inventarioId);
+
+      if (deleteError) throw deleteError;
+
+      setSuccess('Se ha borrado el stock correctamente');
+      onUpdate();
+    } catch (err: any) {
+      setError('Error al borrar el stock: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -68,10 +95,12 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
           throw new Error('El archivo está vacío o no tiene registros válidos');
         }
 
-        // Batch upsert into inventario_stock_sistema
-        // Using upsert on (inventario_id, sku) would be ideal but requires a unique constraint
-        // For simplicity, we'll delete and re-insert, or just handle it as requested.
-        // Direct insert is faster if we cleared before.
+        // Delete existing records for this inventory session before inserting new ones
+        // This ensures the stock is replaced rather than summed up, as requested by the user.
+        await supabase
+          .from('inventario_stock_sistema')
+          .delete()
+          .eq('inventario_id', inventarioId);
         
         const { error: insertError } = await supabase
           .from('inventario_stock_sistema')
@@ -142,7 +171,15 @@ export const StockManager: React.FC<StockManagerProps> = ({ inventarioId, onUpda
           Descargar Plantilla
         </button>
 
-
+        {/* Delete All Button */}
+        <button 
+          onClick={handleDeleteAll}
+          disabled={loading}
+          className="w-full flex items-center justify-center gap-2 bg-red-50 text-red-600 py-4 rounded-2xl font-bold border border-red-100 hover:bg-red-100 transition-all active:scale-95 disabled:opacity-50 sm:col-span-2"
+        >
+          <Trash2 size={20} />
+          Borrar Stock de la Sesión
+        </button>
       </div>
 
       {/* Feedback Messages */}
