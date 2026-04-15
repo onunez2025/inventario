@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import SignatureCanvas from 'react-signature-canvas';
 import { Mail, PenTool, CheckCircle2, X, Loader2, FileText, Send } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { pdfService } from '../services/pdfService';
 import { excelService } from '../services/excelService';
 import type { ConciliacionRecord, Inventario } from '../types';
 
@@ -75,14 +74,11 @@ export const ClosingInventoryModal: React.FC<ClosingInventoryModalProps> = ({
         supervisor: supervisorSigPad.current?.getTrimmedCanvas().toDataURL('image/png') || ''
       };
 
-      // 1. Generate PDF (as blob and as base64)
-      const pdfBlob = await pdfService.generateInventorySummary(inventory, localData, signatures);
-      const pdfBase64 = await new Promise<string>((resolve) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve((reader.result as string).split(',')[1]);
-        reader.readAsDataURL(pdfBlob);
-      });
-      
+      // 1. Prepare Statistics
+      const totalItems = localData.length;
+      const itemsCounted = localData.filter(d => Number(d.cantidad_fisica) > 0).length;
+      const discrepancyItems = localData.filter(d => Number(d.stock_sistema) !== Number(d.cantidad_fisica)).length;
+
       // 2. Generate Excel as base64
       const excelBase64 = await excelService.getInventoryReportBase64(localData, inventory.tienda_nombre);
       
@@ -105,10 +101,18 @@ export const ClosingInventoryModal: React.FC<ClosingInventoryModalProps> = ({
       const { data: edgeData, error: edgeError } = await supabase.functions.invoke('send-inventory-report', {
         body: {
           emails: emailList,
-          pdfBase64,
           excelBase64,
-          inventoryName: inventory.tienda_nombre,
-          date: new Date().toLocaleString()
+          inventoryInfo: {
+            tienda: inventory.tienda_nombre,
+            fecha: new Date().toLocaleString(),
+            id: inventory.id
+          },
+          stats: {
+            total: totalItems,
+            counted: itemsCounted,
+            discrepancies: discrepancyItems
+          },
+          signatures: signatures
         }
       });
 
