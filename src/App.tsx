@@ -335,6 +335,30 @@ const App: React.FC = () => {
                   onChangeInventory={() => setActiveInventory(null)} 
                 />
 
+                {/* Progress Card */}
+                <section className="bg-primary p-6 rounded-[2rem] text-white shadow-xl shadow-primary/20 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 -m-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+                  <div className="flex justify-between items-end mb-4 relative z-10">
+                    <div>
+                      <h3 className="text-lg font-bold">Progreso Toma Física</h3>
+                      <p className="text-xs text-blue-100">Tienda: {activeInventory?.tienda_nombre}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-3xl font-display font-black">
+                        {progreso.total > 0 ? Math.round((progreso.completados / progreso.total) * 100) : 0}
+                        <span className="text-sm ml-1">%</span>
+                      </p>
+                    </div>
+                  </div>
+                  <div className="w-full bg-white/20 h-3 rounded-full overflow-hidden relative z-10">
+                    <div 
+                      className="bg-secondary h-full transition-all duration-1000 shadow-[0_0_10px_rgba(0,161,222,0.5)]" 
+                      style={{ width: `${progreso.total > 0 ? (progreso.completados / progreso.total) * 100 : 0}%` }}
+                    />
+                  </div>
+                  <p className="mt-3 text-[10px] uppercase font-bold text-blue-200 tracking-widest">{progreso.completados} de {progreso.total} productos auditados</p>
+                </section>
+
                 <div className="flex bg-gray-100 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
                   <button 
                     onClick={() => setActiveTab('summary')}
@@ -394,29 +418,6 @@ const App: React.FC = () => {
                       <DashboardIndicators data={data} tiendaNombre={activeInventory?.tienda_nombre} />
                     )}
 
-                {/* Progress Card */}
-                <section className="bg-primary p-6 rounded-[2rem] text-white shadow-xl shadow-primary/20 relative overflow-hidden">
-                  <div className="absolute top-0 right-0 -m-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
-                  <div className="flex justify-between items-end mb-4 relative z-10">
-                    <div>
-                      <h3 className="text-lg font-bold">Progreso Toma Física</h3>
-                      <p className="text-xs text-blue-100">Tienda: {activeInventory?.tienda_nombre}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-3xl font-display font-black">
-                        {progreso.total > 0 ? Math.round((progreso.completados / progreso.total) * 100) : 0}
-                        <span className="text-sm ml-1">%</span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className="w-full bg-white/20 h-3 rounded-full overflow-hidden relative z-10">
-                    <div 
-                      className="bg-secondary h-full transition-all duration-1000 shadow-[0_0_10px_rgba(0,161,222,0.5)]" 
-                      style={{ width: `${progreso.total > 0 ? (progreso.completados / progreso.total) * 100 : 0}%` }}
-                    />
-                  </div>
-                  <p className="mt-3 text-[10px] uppercase font-bold text-blue-200 tracking-widest">{progreso.completados} de {progreso.total} productos auditados</p>
-                </section>
 
 
 
