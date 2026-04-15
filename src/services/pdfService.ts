@@ -1,5 +1,3 @@
-import * as jspdf from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { ConciliacionRecord, Inventario } from '../types';
 
 export const pdfService = {
@@ -8,15 +6,18 @@ export const pdfService = {
     data: ConciliacionRecord[],
     signatures: { manager: string; supervisor: string }
   ) {
-    // Ultra-defensive way to get the constructors
-    let JsPDFConstructor = (jspdf as any).jsPDF || (jspdf as any).default || jspdf;
+    // Dynamic import to solve ESM/CJS bundling issues in production
+    const jspdfModule = await import('jspdf');
+    const autoTableModule = await import('jspdf-autotable');
+
+    let JsPDFConstructor = (jspdfModule as any).jsPDF || (jspdfModule as any).default || jspdfModule;
     if (typeof JsPDFConstructor !== 'function' && (JsPDFConstructor as any).default) {
       JsPDFConstructor = (JsPDFConstructor as any).default;
     }
     
     const doc = new (JsPDFConstructor as any)();
     
-    let applyAutoTable = (autoTable as any).default || autoTable;
+    let applyAutoTable = (autoTableModule as any).default || autoTableModule;
     if (typeof applyAutoTable !== 'function' && (applyAutoTable as any).default) {
       applyAutoTable = (applyAutoTable as any).default;
     }
