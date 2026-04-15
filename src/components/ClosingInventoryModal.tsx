@@ -76,7 +76,7 @@ export const ClosingInventoryModal: React.FC<ClosingInventoryModalProps> = ({
       };
 
       // 1. Generate PDF (as blob and as base64)
-      const pdfBlob = await pdfService.generateInventorySummary(inventory, localData, signatures, emailList);
+      const pdfBlob = await pdfService.generateInventorySummary(inventory, localData, signatures);
       const pdfBase64 = await new Promise<string>((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve((reader.result as string).split(',')[1]);

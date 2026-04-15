@@ -6,8 +6,7 @@ export const pdfService = {
   async generateInventorySummary(
     inventory: Inventario,
     data: ConciliacionRecord[],
-    signatures: { manager: string; supervisor: string },
-    emails: string[]
+    signatures: { manager: string; supervisor: string }
   ) {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -28,7 +27,7 @@ export const pdfService = {
     // Summary Stats
     const totalItems = data.length;
     const itemsCounted = data.filter(d => Number(d.cantidad_fisica) > 0).length;
-    const discrepancyItems = data.filter(d => Number(d.cantidad_sistema) !== Number(d.cantidad_fisica)).length;
+    const discrepancyItems = data.filter(d => Number(d.stock_sistema) !== Number(d.cantidad_fisica)).length;
 
     doc.setFontSize(14);
     doc.setTextColor(0);
