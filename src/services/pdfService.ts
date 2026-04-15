@@ -1,5 +1,5 @@
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 import { ConciliacionRecord, Inventario } from '../types';
 
 export const pdfService = {
@@ -34,7 +34,7 @@ export const pdfService = {
     doc.text('Estadísticas Generales', 20, 70);
     
     // @ts-ignore
-    doc.autoTable({
+    autoTable(doc, {
       startY: 75,
       head: [['Concepto', 'Valor']],
       body: [
