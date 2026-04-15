@@ -79,7 +79,7 @@ export const SystemStockTable: React.FC<SystemStockTableProps> = ({ inventarioId
     <div className="space-y-6">
       <StockManager inventarioId={inventarioId} onUpdate={handleUpdate} />
 
-      <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col h-[600px]">
+      <div className="bg-white rounded-[1.5rem] sm:rounded-[2rem] p-3 sm:p-6 shadow-sm border border-gray-100 flex flex-col h-[600px]">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">

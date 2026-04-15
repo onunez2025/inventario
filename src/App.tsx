@@ -325,7 +325,7 @@ const App: React.FC = () => {
             </div>
           </header>
 
-          <main className="p-4 max-w-4xl mx-auto space-y-6 pb-24 flex-1">
+          <main className="p-3 sm:p-4 max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-32 flex-1">
             {!activeInventory ? (
               <InventorySelector onSelect={handleSelectInventory} />
             ) : (
@@ -340,8 +340,8 @@ const App: React.FC = () => {
                   <div className="absolute top-0 right-0 -m-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
                   <div className="flex justify-between items-end mb-4 relative z-10">
                     <div>
-                      <h3 className="text-lg font-bold">Progreso Toma Física</h3>
-                      <p className="text-xs text-blue-100">Tienda: {activeInventory?.tienda_nombre}</p>
+                      <h3 className="text-base sm:text-lg font-bold">Progreso Toma Física</h3>
+                      <p className="text-[10px] sm:text-xs text-blue-100 line-clamp-1">Tienda: {activeInventory?.tienda_nombre}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-3xl font-display font-black">
@@ -359,10 +359,10 @@ const App: React.FC = () => {
                   <p className="mt-3 text-[10px] uppercase font-bold text-blue-200 tracking-widest">{progreso.completados} de {progreso.total} productos auditados</p>
                 </section>
 
-                <div className="flex bg-gray-100 p-1.5 rounded-2xl overflow-x-auto no-scrollbar">
+                <div className="flex bg-gray-100 p-1 rounded-2xl overflow-x-auto no-scrollbar sticky top-[68px] z-30 shadow-sm border border-gray-200/50">
                   <button 
                     onClick={() => setActiveTab('summary')}
-                    className={`flex-1 min-w-[120px] px-4 py-2.5 rounded-xl text-sm font-bold transition-all ${activeTab === 'summary' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                    className={`flex-1 min-w-[100px] px-3 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'summary' ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
                   >
                     Resumen Cruce
                   </button>
@@ -383,7 +383,7 @@ const App: React.FC = () => {
                   {hasPermission('view_dashboard') && (
                     <button 
                       onClick={() => excelService.exportInventoryReport(data, activeInventory.tienda_nombre)}
-                      className="ml-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-green-600 transition-all shadow-sm active:scale-95"
+                      className="ml-2 px-3 py-2 bg-green-500 text-white rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-green-600 transition-all shadow-sm active:scale-95 flex-shrink-0"
                       title="Exportar a Excel"
                     >
                       <Download size={16} />
@@ -480,7 +480,7 @@ const App: React.FC = () => {
 
       {/* Floating Bottom Nav for Mobile - Persistent */}
       {!showScanner && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-100 pb-8 flex items-end z-[140] shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-100 pb-6 flex items-end z-[140] shadow-[0_-10px_40px_rgba(0,0,0,0.08)]">
           {/* Lado Izquierdo: Acciones Principales */}
           <div className="flex-1 flex justify-around items-center pb-2 px-2">
             <button 

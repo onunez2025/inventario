@@ -104,7 +104,7 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
         
         {/* Widget: Resumen por Grupo de Articulo */}
         <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
-          <div className="p-6 pb-2 flex justify-between items-center">
+          <div className="p-4 sm:p-6 pb-2 flex justify-between items-center">
             <div>
               <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Grupo de Artículo</h3>
               <button 
@@ -144,7 +144,7 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
         </div>
 
         {/* Widget: Grafico de Inventario */}
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-6 flex flex-col h-[400px]">
+        <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-gray-100 p-4 sm:p-6 flex flex-col h-[400px]">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Gráfico de Inventario</h3>
             <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 rounded-full">VALOR X DIFERENCIA</span>
@@ -178,7 +178,7 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
         </div>
 
         {/* Widget: Resultados por Estado */}
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resultados por Estado</h3>
             <CheckCircle2 size={18} className="text-green-500 opacity-20" />
@@ -213,7 +213,7 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
         </div>
 
         {/* Widget: Resumen por Local */}
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 p-6 space-y-6">
+        <div className="bg-white rounded-[1.5rem] sm:rounded-[2.5rem] shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4 sm:space-y-6">
           <div className="flex justify-between items-center">
             <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Local</h3>
             <div className="w-8 h-8 rounded-2xl bg-primary/5 flex items-center justify-center">
@@ -231,7 +231,7 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
              </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
              <div className="space-y-1">
                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sistema</p>
                 <p className="text-base font-black text-gray-700 font-mono tracking-tighter">
@@ -277,7 +277,7 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
 
         {/* Widget: Resumen por Marca (Nuevo) */}
         <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px] lg:col-span-2">
-           <div className="p-6 pb-2 flex justify-between items-center">
+           <div className="p-4 sm:p-6 pb-2 flex justify-between items-center">
             <div className="flex items-center gap-3">
                <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Marca</h3>
                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 uppercase">{brandData.length} Marcas</span>
