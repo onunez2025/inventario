@@ -123,19 +123,36 @@ const App: React.FC = () => {
     }
 
     setLoading(true);
-    const { data: records, error } = await supabase
-      .from('vista_conciliacion')
-      .select('*')
-      .eq('inventario_id', activeInventory.id)
-      .limit(10000); // Fetch up to 10k records to avoid default 1000 limit truncating counts
+    
+    // Paginated fetch to overcome Supabase's 1000-row default limit
+    let allRecords: ConciliacionRecord[] = [];
+    let from = 0;
+    const batchSize = 1000;
+    let fetchError = null;
 
-    if (error) console.error('Error fetching data:', error);
+    while (true) {
+      const { data: batch, error } = await supabase
+        .from('vista_conciliacion')
+        .select('*')
+        .eq('inventario_id', activeInventory.id)
+        .range(from, from + batchSize - 1);
+
+      if (error) {
+        fetchError = error;
+        break;
+      }
+
+      allRecords = [...allRecords, ...(batch || [])];
+
+      // If we got fewer rows than the batch size, we've reached the end
+      if (!batch || batch.length < batchSize) break;
+      from += batchSize;
+    }
+
+    if (fetchError) console.error('Error fetching data:', fetchError);
     else {
-      setData(records || []);
-      // Debug log for the specific reported SKU
-      const targetSku = '7500435214605';
-      const targetRecord = (records || []).find(r => r.sku === targetSku);
-      console.log(`SKU ${targetSku} check:`, targetRecord || 'NOT FOUND IN DATA');
+      setData(allRecords);
+      console.log(`Vista conciliación: ${allRecords.length} registros cargados`);
     }
 
     // Fetch individual recent counts for the activity feed
