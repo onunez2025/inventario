@@ -130,7 +130,13 @@ const App: React.FC = () => {
       .limit(10000); // Fetch up to 10k records to avoid default 1000 limit truncating counts
 
     if (error) console.error('Error fetching data:', error);
-    else setData(records || []);
+    else {
+      setData(records || []);
+      // Debug log for the specific reported SKU
+      const targetSku = '7500435214605';
+      const targetRecord = (records || []).find(r => r.sku === targetSku);
+      console.log(`SKU ${targetSku} check:`, targetRecord || 'NOT FOUND IN DATA');
+    }
 
     // Fetch individual recent counts for the activity feed
     const { data: recent, error: recentError } = await supabase
@@ -222,7 +228,7 @@ const App: React.FC = () => {
 
   const progreso = {
     total: activeInventory ? (data.length || 0) : 0,
-    completados: data.filter(d => d.cantidad_fisica > 0).length
+    completados: data.filter(d => Number(d.cantidad_fisica) > 0).length
   };
 
   return (

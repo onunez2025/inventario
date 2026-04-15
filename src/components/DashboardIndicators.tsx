@@ -30,7 +30,8 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
   // 1. Agregación por Categoría (Grupo de Artículo)
   const categoryMap = data.reduce((acc, curr) => {
     const cat = curr.categoria || 'OTROS';
-    acc[cat] = (acc[cat] || 0) + (curr.diferencia_valorizada || 0);
+    const valor = Number(curr.diferencia_valorizada || 0);
+    acc[cat] = (acc[cat] || 0) + valor;
     return acc;
   }, {} as Record<string, number>);
 
@@ -41,7 +42,8 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
   // 2. Agregación por Marca
   const brandMap = data.reduce((acc, curr) => {
     const brand = curr.marca || 'OTROS';
-    acc[brand] = (acc[brand] || 0) + (curr.diferencia_valorizada || 0);
+    const valor = Number(curr.diferencia_valorizada || 0);
+    acc[brand] = (acc[brand] || 0) + valor;
     return acc;
   }, {} as Record<string, number>);
 
@@ -53,40 +55,43 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
   const statusSummary = {
     Faltante: { 
       skus: 0, 
-      confirmados: data.filter(r => r.diferencia_unidades < 0 && r.cantidad_fisica > 0).length, 
+      confirmados: data.filter(r => Number(r.diferencia_unidades) < 0 && Number(r.cantidad_fisica) > 0).length, 
       valor: 0 
     },
     Sobrante: { 
       skus: 0, 
-      confirmados: data.filter(r => r.diferencia_unidades > 0 && r.cantidad_fisica > 0).length, 
+      confirmados: data.filter(r => Number(r.diferencia_unidades) > 0 && Number(r.cantidad_fisica) > 0).length, 
       valor: 0 
     },
     Cuadrado: { 
       skus: 0, 
-      confirmados: data.filter(r => r.diferencia_unidades === 0 && r.cantidad_fisica > 0).length, 
+      confirmados: data.filter(r => Number(r.diferencia_unidades) === 0 && Number(r.cantidad_fisica) > 0).length, 
       valor: 0 
     }
   };
 
   data.forEach(r => {
-    if (r.diferencia_unidades < 0) {
+    const dif = Number(r.diferencia_unidades);
+    const val = Number(r.diferencia_valorizada || 0);
+    
+    if (dif < 0) {
       statusSummary.Faltante.skus++;
-      statusSummary.Faltante.valor += (r.diferencia_valorizada || 0);
-    } else if (r.diferencia_unidades > 0) {
+      statusSummary.Faltante.valor += val;
+    } else if (dif > 0) {
       statusSummary.Sobrante.skus++;
-      statusSummary.Sobrante.valor += (r.diferencia_valorizada || 0);
+      statusSummary.Sobrante.valor += val;
     } else {
       statusSummary.Cuadrado.skus++;
-      statusSummary.Cuadrado.valor += (r.diferencia_valorizada || 0);
+      statusSummary.Cuadrado.valor += val;
     }
   });
 
   // 4. Resumen por Local
   const totals = data.reduce((acc, curr) => ({
-    sistema: acc.sistema + (curr.stock_sistema || 0),
-    inventario: acc.inventario + (curr.cantidad_fisica || 0),
-    diferencia: acc.diferencia + (curr.diferencia_unidades || 0),
-    valor: acc.valor + (curr.diferencia_valorizada || 0)
+    sistema: acc.sistema + Number(curr.stock_sistema || 0),
+    inventario: acc.inventario + Number(curr.cantidad_fisica || 0),
+    diferencia: acc.diferencia + Number(curr.diferencia_unidades || 0),
+    valor: acc.valor + Number(curr.diferencia_valorizada || 0)
   }), { sistema: 0, inventario: 0, diferencia: 0, valor: 0 });
 
   const formatCurrency = (val: number) => {

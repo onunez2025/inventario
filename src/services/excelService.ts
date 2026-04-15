@@ -6,13 +6,15 @@ export const excelService = {
     // 1. Prepare Summary Data (Pestaña 1)
     const categoryMap = data.reduce((acc, curr) => {
       const cat = curr.categoria || 'OTROS';
-      acc[cat] = (acc[cat] || 0) + (curr.diferencia_valorizada || 0);
+      const valor = Number(curr.diferencia_valorizada || 0);
+      acc[cat] = (acc[cat] || 0) + valor;
       return acc;
     }, {} as Record<string, number>);
 
     const brandMap = data.reduce((acc, curr) => {
       const brand = curr.marca || 'OTROS';
-      acc[brand] = (acc[brand] || 0) + (curr.diferencia_valorizada || 0);
+      const valor = Number(curr.diferencia_valorizada || 0);
+      acc[brand] = (acc[brand] || 0) + valor;
       return acc;
     }, {} as Record<string, number>);
 
@@ -23,22 +25,25 @@ export const excelService = {
     };
 
     const totals = data.reduce((acc, curr) => {
-      if (curr.diferencia_unidades < 0) {
+      const dif = Number(curr.diferencia_unidades || 0);
+      const val = Number(curr.diferencia_valorizada || 0);
+
+      if (dif < 0) {
         statusSummary.Faltante.skus++;
-        statusSummary.Faltante.valor += (curr.diferencia_valorizada || 0);
-      } else if (curr.diferencia_unidades > 0) {
+        statusSummary.Faltante.valor += val;
+      } else if (dif > 0) {
         statusSummary.Sobrante.skus++;
-        statusSummary.Sobrante.valor += (curr.diferencia_valorizada || 0);
+        statusSummary.Sobrante.valor += val;
       } else {
         statusSummary.Cuadrado.skus++;
-        statusSummary.Cuadrado.valor += (curr.diferencia_valorizada || 0);
+        statusSummary.Cuadrado.valor += val;
       }
 
       return {
-        sistema: acc.sistema + (curr.stock_sistema || 0),
-        inventario: acc.inventario + (curr.cantidad_fisica || 0),
-        diferencia: acc.diferencia + (curr.diferencia_unidades || 0),
-        valor: acc.valor + (curr.diferencia_valorizada || 0)
+        sistema: acc.sistema + Number(curr.stock_sistema || 0),
+        inventario: acc.inventario + Number(curr.cantidad_fisica || 0),
+        diferencia: acc.diferencia + dif,
+        valor: acc.valor + val
       };
     }, { sistema: 0, inventario: 0, diferencia: 0, valor: 0 });
 
@@ -80,12 +85,12 @@ export const excelService = {
         'Descripción': r.articulo_nombre,
         'Marca': r.marca || 'S/N',
         'Categoría': r.categoria || 'S/N',
-        'Valor x Und': r.costo_unitario,
-        'Stock Sistema': r.stock_sistema,
-        'Stock Inventario': r.cantidad_fisica,
-        'Diferencia': r.diferencia_unidades,
-        'Valor x Diferencia': r.diferencia_valorizada,
-        'Absoluto': Math.abs(r.diferencia_valorizada),
+        'Valor x Und': Number(r.costo_unitario),
+        'Stock Sistema': Number(r.stock_sistema),
+        'Stock Inventario': Number(r.cantidad_fisica),
+        'Diferencia': Number(r.diferencia_unidades),
+        'Valor x Diferencia': Number(r.diferencia_valorizada),
+        'Absoluto': Math.abs(Number(r.diferencia_valorizada)),
         'Estado': status,
         'Observación': r.ultima_observacion || ''
       };
