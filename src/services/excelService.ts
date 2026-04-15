@@ -1,9 +1,15 @@
-import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import type { ConciliacionRecord } from '../types';
 
 export const excelService = {
-  exportInventoryReport: (data: ConciliacionRecord[], tiendaNombre: string) => {
-    // 1. Prepare Summary Data (Pestaña 1)
+  exportInventoryReport: async (data: ConciliacionRecord[], tiendaNombre: string) => {
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Invent-IA';
+    workbook.lastModifiedBy = 'Invent-IA';
+    workbook.created = new Date();
+    
+    // 1. Calculations
     const categoryMap = data.reduce((acc, curr) => {
       const cat = curr.categoria || 'OTROS';
       const valor = Number(curr.diferencia_valorizada || 0);
@@ -11,34 +17,9 @@ export const excelService = {
       return acc;
     }, {} as Record<string, number>);
 
-    const brandMap = data.reduce((acc, curr) => {
-      const brand = curr.marca || 'OTROS';
-      const valor = Number(curr.diferencia_valorizada || 0);
-      acc[brand] = (acc[brand] || 0) + valor;
-      return acc;
-    }, {} as Record<string, number>);
-
-    const statusSummary = {
-      Faltante: { skus: 0, valor: 0 },
-      Sobrante: { skus: 0, valor: 0 },
-      Cuadrado: { skus: 0, valor: 0 }
-    };
-
     const totals = data.reduce((acc, curr) => {
       const dif = Number(curr.diferencia_unidades || 0);
       const val = Number(curr.diferencia_valorizada || 0);
-
-      if (dif < 0) {
-        statusSummary.Faltante.skus++;
-        statusSummary.Faltante.valor += val;
-      } else if (dif > 0) {
-        statusSummary.Sobrante.skus++;
-        statusSummary.Sobrante.valor += val;
-      } else {
-        statusSummary.Cuadrado.skus++;
-        statusSummary.Cuadrado.valor += val;
-      }
-
       return {
         sistema: acc.sistema + Number(curr.stock_sistema || 0),
         inventario: acc.inventario + Number(curr.cantidad_fisica || 0),
@@ -47,65 +28,165 @@ export const excelService = {
       };
     }, { sistema: 0, inventario: 0, diferencia: 0, valor: 0 });
 
-    // Prepare Summary Rows
-    const summaryRows: any[] = [
-      ['RESUMEN DE INDICADORES - INVENTARIO'],
-      ['TIENDA:', tiendaNombre],
-      ['FECHA:', new Date().toLocaleDateString()],
-      [],
-      ['TOTALES GENERALES'],
-      ['Stock Sistema', totals.sistema],
-      ['Stock Inventario', totals.inventario],
-      ['Diferencia Unidades', totals.diferencia],
-      ['Valorización Diferencia', totals.valor],
-      [],
-      ['RESUMEN POR ESTADO'],
-      ['Estado', 'SKUs', 'Valor Diferencia'],
-      ['Faltante', statusSummary.Faltante.skus, statusSummary.Faltante.valor],
-      ['Sobrante', statusSummary.Sobrante.skus, statusSummary.Sobrante.valor],
-      ['Cuadrado', statusSummary.Cuadrado.skus, statusSummary.Cuadrado.valor],
-      [],
-      ['RESUMEN POR CATEGORÍA'],
-      ['Categoría', 'Valor Diferencia'],
-      ...Object.entries(categoryMap).map(([name, value]) => [name, value]),
-      [],
-      ['RESUMEN POR MARCA'],
-      ['Marca', 'Valor Diferencia'],
-      ...Object.entries(brandMap).map(([name, value]) => [name, value])
-    ];
-
-    // 2. Prepare Detail Data (Pestaña 2)
-    const detailRows = data.map(r => {
-      let status = 'Cuadra';
-      if (r.diferencia_unidades < 0) status = 'Faltante';
-      else if (r.diferencia_unidades > 0) status = 'Sobrante';
-
-      return {
-        'Número de Artículo': r.sku,
-        'Descripción': r.articulo_nombre,
-        'Marca': r.marca || 'S/N',
-        'Categoría': r.categoria || 'S/N',
-        'Valor x Und': Number(r.costo_unitario),
-        'Stock Sistema': Number(r.stock_sistema),
-        'Stock Inventario': Number(r.cantidad_fisica),
-        'Diferencia': Number(r.diferencia_unidades),
-        'Valor x Diferencia': Number(r.diferencia_valorizada),
-        'Absoluto': Math.abs(Number(r.diferencia_valorizada)),
-        'Estado': status,
-        'Observación': r.ultima_observacion || ''
-      };
+    // ---------------------------------------------------------
+    // SHEET 1: RESUMEN EJECUTIVO
+    // ---------------------------------------------------------
+    const wsSummary = workbook.addWorksheet('Resumen Ejecutivo', {
+      views: [{ showGridLines: false }]
     });
 
-    // Create workbook and worksheets
-    const wb = XLSX.utils.book_new();
+    // Column Widths
+    wsSummary.getColumn('A').width = 4;
+    wsSummary.getColumn('B').width = 25;
+    wsSummary.getColumn('C').width = 20;
+    wsSummary.getColumn('D').width = 20;
+    wsSummary.getColumn('E').width = 20;
+
+    // Title
+    const titleCell = wsSummary.getCell('B2');
+    titleCell.value = 'INFORME DE AUDITORÍA DE INVENTARIO';
+    titleCell.font = { name: 'Arial Black', size: 18, color: { argb: 'FF1E3A8A' } };
+    wsSummary.mergeCells('B2:E2');
+
+    // Store Info
+    wsSummary.getCell('B4').value = 'TIENDA:';
+    wsSummary.getCell('B4').font = { bold: true };
+    wsSummary.getCell('C4').value = tiendaNombre.toUpperCase();
     
-    const wsSummary = XLSX.utils.aoa_to_sheet(summaryRows);
-    const wsDetail = XLSX.utils.json_to_sheet(detailRows);
+    wsSummary.getCell('B5').value = 'FECHA REPORTE:';
+    wsSummary.getCell('B5').font = { bold: true };
+    wsSummary.getCell('C5').value = new Date().toLocaleDateString();
 
-    XLSX.utils.book_append_sheet(wb, wsSummary, 'Resumen Indicadores');
-    XLSX.utils.book_append_sheet(wb, wsDetail, 'Detalle Diferencias');
+    // KPI Section Container
+    const kpiHeader = wsSummary.getCell('B7');
+    kpiHeader.value = 'INDICADORES PRINCIPALES';
+    kpiHeader.font = { bold: true, size: 12, color: { argb: 'FFFFFFFF' } };
+    kpiHeader.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+    wsSummary.mergeCells('B7:E7');
 
-    // Save File
-    XLSX.writeFile(wb, `Reporte_Inventario_${tiendaNombre.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
+    const kpiData = [
+      ['Stock en Sistema', totals.sistema, 'uds'],
+      ['Stock Físico (Auditor)', totals.inventario, 'uds'],
+      ['Diferencia Neta', totals.diferencia, 'uds'],
+      ['Valorización Total Diferencia', totals.valor, 'PEN']
+    ];
+
+    kpiData.forEach((row, i) => {
+      const rowIndex = 8 + i;
+      const label = wsSummary.getCell(`B${rowIndex}`);
+      const val = wsSummary.getCell(`C${rowIndex}`);
+      
+      label.value = row[0];
+      label.font = { bold: true };
+      label.border = { bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } } };
+      
+      val.value = row[1];
+      if (row[2] === 'PEN') val.numFmt = '"S/ " #,##0.00;[Red]"-S/ " #,##0.00';
+      else val.numFmt = '#,##0';
+      val.font = { bold: true, color: { argb: Number(row[1]) < 0 ? 'FFEF4444' : 'FF065F46' } };
+      val.border = { bottom: { style: 'thin', color: { argb: 'FFE5E7EB' } } };
+    });
+
+    // Summary Tables - Category
+    const catStart = 14;
+    wsSummary.getCell(`B${catStart}`).value = 'RESUMEN POR GRUPO DE ARTÍCULO';
+    wsSummary.getCell(`B${catStart}`).font = { bold: true, color: { argb: 'FF1E3A8A' } };
+    
+    wsSummary.getRow(catStart + 1).values = ['', 'Categoría', 'Valorización Dif.'];
+    const tableHeader = wsSummary.getRow(catStart + 1);
+    tableHeader.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    ['B', 'C'].forEach(col => {
+      const cell = wsSummary.getCell(`${col}${catStart + 1}`);
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF64748B' } };
+      cell.alignment = { horizontal: 'center' };
+    });
+
+    let currentIdx = catStart + 2;
+    Object.entries(categoryMap).sort((a, b) => a[1] - b[1]).forEach(([cat, val]) => {
+      const row = wsSummary.getRow(currentIdx);
+      row.getCell(2).value = cat.toUpperCase();
+      const valCell = row.getCell(3);
+      valCell.value = val;
+      valCell.numFmt = '"S/ " #,##0.00;[Red]"-S/ " #,##0.00';
+      valCell.font = { color: { argb: val < 0 ? 'FFEF4444' : 'FF065F46' } };
+      
+      // Zebra striping
+      if (currentIdx % 2 === 0) {
+        row.getCell(2).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FAFB' } };
+        row.getCell(3).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FAFB' } };
+      }
+      currentIdx++;
+    });
+
+    // ---------------------------------------------------------
+    // SHEET 2: DETALLE DE DIFERENCIAS
+    // ---------------------------------------------------------
+    const wsDetail = workbook.addWorksheet('Detalle de Diferencias');
+    wsDetail.columns = [
+      { header: 'Estatus', key: 'status', width: 12 },
+      { header: 'SKU', key: 'sku', width: 18 },
+      { header: 'Nombre del Artículo', key: 'nombre', width: 45 },
+      { header: 'Marca', key: 'marca', width: 15 },
+      { header: 'Categoría', key: 'categoria', width: 20 },
+      { header: 'Costo Unit.', key: 'costo', width: 12 },
+      { header: 'Stock Sis.', key: 'sistema', width: 12 },
+      { header: 'Físico', key: 'fisico', width: 12 },
+      { header: 'Diferencia', key: 'dif', width: 12 },
+      { header: 'Valor Dif.', key: 'valor', width: 15 },
+      { header: 'Observación', key: 'obs', width: 30 },
+    ];
+
+    // Style Header Detail
+    wsDetail.getRow(1).height = 25;
+    wsDetail.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    wsDetail.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
+    wsDetail.getRow(1).eachCell((cell) => {
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF1E3A8A' } };
+    });
+
+    // Add Data
+    data.forEach(r => {
+      const dif = Number(r.diferencia_unidades);
+      let status = 'CUADRADO';
+      if (dif < 0) status = 'FALTANTE';
+      else if (dif > 0) status = 'SOBRANTE';
+
+      const row = wsDetail.addRow({
+        status,
+        sku: r.sku,
+        nombre: r.articulo_nombre.toUpperCase(),
+        marca: (r.marca || 'S/N').toUpperCase(),
+        categoria: (r.categoria || 'S/N').toUpperCase(),
+        costo: Number(r.costo_unitario),
+        sistema: Number(r.stock_sistema),
+        fisico: Number(r.cantidad_fisica),
+        dif: dif,
+        valor: Number(r.diferencia_valorizada),
+        obs: r.ultima_observacion || ''
+      });
+
+      // Conditional Formatting logic
+      const statusCell = row.getCell(1);
+      if (status === 'FALTANTE') statusCell.font = { color: { argb: 'FF991B1B' }, bold: true };
+      else if (status === 'SOBRANTE') statusCell.font = { color: { argb: 'FF065F46' }, bold: true };
+      else statusCell.font = { color: { argb: 'FF6B7280' } };
+
+      row.getCell(6).numFmt = '"S/ " #,##0.00';
+      row.getCell(10).numFmt = '"S/ " #,##0.00;[Red]"-S/ " #,##0.00';
+      
+      const difCell = row.getCell(9);
+      if (dif !== 0) {
+        difCell.font = { bold: true, color: { argb: dif < 0 ? 'FFEF4444' : 'FF10B981' } };
+      }
+    });
+
+    // Final touches for detail sheet
+    wsDetail.autoFilter = 'A1:K1';
+    wsDetail.views = [{ state: 'frozen', ySplit: 1 }];
+
+    // 3. Generate and Save
+    const buffer = await workbook.xlsx.writeBuffer();
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, `Reporte_Inventario_${tiendaNombre.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.xlsx`);
   }
 };
