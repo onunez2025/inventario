@@ -12,8 +12,10 @@ import {
   User, 
   Database, 
   Users, 
-  Calendar 
+  Calendar,
+  Download
 } from 'lucide-react';
+import { excelService } from './services/excelService';
 import { ScannerComponent } from './components/ScannerComponent';
 import { VerificationModal } from './components/VerificationModal';
 import { ItemMaster } from './components/ItemMaster';
@@ -331,6 +333,16 @@ const App: React.FC = () => {
                   >
                     Conteos Detalle
                   </button>
+                  {hasPermission('view_dashboard') && (
+                    <button 
+                      onClick={() => excelService.exportInventoryReport(data, activeInventory.tienda_nombre)}
+                      className="ml-2 px-4 py-2 bg-green-500 text-white rounded-xl text-sm font-bold flex items-center gap-2 hover:bg-green-600 transition-all shadow-sm active:scale-95"
+                      title="Exportar a Excel"
+                    >
+                      <Download size={16} />
+                      <span className="hidden sm:inline">Exportar</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Tab: Stock de Sistema */}

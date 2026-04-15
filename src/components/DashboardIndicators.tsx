@@ -15,8 +15,10 @@ import {
   MapPin, 
   Activity, 
   TrendingDown, 
-  CheckCircle2
+  CheckCircle2,
+  Download
 } from 'lucide-react';
+import { excelService } from '../services/excelService';
 import type { ConciliacionRecord } from '../types';
 
 interface DashboardIndicatorsProps {
@@ -98,7 +100,16 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
         {/* Widget: Resumen por Grupo de Articulo */}
         <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
           <div className="p-6 pb-2 flex justify-between items-center">
-            <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Grupo de Artículo</h3>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Grupo de Artículo</h3>
+              <button 
+                onClick={() => excelService.exportInventoryReport(data, tiendaNombre || 'S/N')}
+                className="mt-2 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg shadow-green-500/20 active:scale-95 transition-all"
+              >
+                <Download size={12} />
+                Exportar Excel
+              </button>
+            </div>
             <Activity size={18} className="text-primary opacity-20" />
           </div>
           <div className="flex-1 overflow-auto px-6 pb-6 scrollbar-hide">
