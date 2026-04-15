@@ -8,9 +8,19 @@ export const pdfService = {
     data: ConciliacionRecord[],
     signatures: { manager: string; supervisor: string }
   ) {
-    // Robust way to get the jsPDF constructor in multiple environments (Vite/Node/Browser)
-    const JsPDFConstructor = (jspdf as any).jsPDF || (jspdf as any).default || jspdf;
-    const doc = new JsPDFConstructor();
+    // Ultra-defensive way to get the constructors
+    let JsPDFConstructor = (jspdf as any).jsPDF || (jspdf as any).default || jspdf;
+    if (typeof JsPDFConstructor !== 'function' && (JsPDFConstructor as any).default) {
+      JsPDFConstructor = (JsPDFConstructor as any).default;
+    }
+    
+    const doc = new (JsPDFConstructor as any)();
+    
+    let applyAutoTable = (autoTable as any).default || autoTable;
+    if (typeof applyAutoTable !== 'function' && (applyAutoTable as any).default) {
+      applyAutoTable = (applyAutoTable as any).default;
+    }
+    
     const pageWidth = doc.internal.pageSize.getWidth();
 
     // Header
@@ -36,7 +46,7 @@ export const pdfService = {
     doc.text('Estadísticas Generales', 20, 70);
     
     // @ts-ignore
-    autoTable(doc, {
+    applyAutoTable(doc, {
       startY: 75,
       head: [['Concepto', 'Valor']],
       body: [
