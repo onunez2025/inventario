@@ -16,7 +16,8 @@ import {
   Activity, 
   TrendingDown, 
   CheckCircle2,
-  Download
+  Download,
+  Filter
 } from 'lucide-react';
 import { excelService } from '../services/excelService';
 import type { ConciliacionRecord } from '../types';
