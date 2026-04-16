@@ -161,10 +161,41 @@ export const excelService = {
       vCell.font = { color: { argb: value < 0 ? 'FFEF4444' : 'FF065F46' } };
     });
 
-    let currentIdx = typeStart + 2 + Object.keys(typeMap).length + 2;
-    // (Categorization logic...)
+    const brandStart = typeStart + 2 + Object.keys(typeMap).length + 2;
+    wsSummary.getCell(`B${brandStart}`).value = 'RESUMEN POR MARCA';
+    wsSummary.getCell(`B${brandStart}`).font = { bold: true, color: { argb: 'FF1E3A8A' } };
+    wsSummary.getRow(brandStart + 1).values = ['', 'Marca', 'Valorización Dif.'];
+    applyTableHeader(`B${brandStart + 1}:C${brandStart + 1}`, 'FF1E3A8A');
 
-    // SHEET 2: DETALLE DE DIFERENCIAS
+    Object.entries(brandMap)
+      .sort((a, b) => a[1] - b[1]) // Mostrar primero las marcas con mayor diferencia negativa
+      .forEach(([name, value], i) => {
+        const rowIndex = brandStart + 2 + i;
+        const row = wsSummary.getRow(rowIndex);
+        row.getCell(2).value = name.toUpperCase();
+        const vCell = row.getCell(3);
+        vCell.value = value;
+        vCell.numFmt = '"S/ " #,##0.00;[Red]"-S/ " #,##0.00';
+        vCell.font = { color: { argb: value < 0 ? 'FFEF4444' : 'FF065F46' } };
+      });
+
+    const categoryStart = currentIdx;
+    wsSummary.getCell(`B${categoryStart}`).value = 'RESUMEN POR CATEGORÍA';
+    wsSummary.getCell(`B${categoryStart}`).font = { bold: true, color: { argb: 'FF1E3A8A' } };
+    wsSummary.getRow(categoryStart + 1).values = ['', 'Categoría', 'Valorización Dif.'];
+    applyTableHeader(`B${categoryStart + 1}:C${categoryStart + 1}`, 'FF1E3A8A');
+
+    Object.entries(categoryMap)
+      .sort((a, b) => a[1] - b[1])
+      .forEach(([name, value], i) => {
+        const rowIndex = categoryStart + 2 + i;
+        const row = wsSummary.getRow(rowIndex);
+        row.getCell(2).value = name.toUpperCase();
+        const vCell = row.getCell(3);
+        vCell.value = value;
+        vCell.numFmt = '"S/ " #,##0.00;[Red]"-S/ " #,##0.00';
+        vCell.font = { color: { argb: value < 0 ? 'FFEF4444' : 'FF065F46' } };
+      });
     const wsDetail = workbook.addWorksheet('Detalle de Diferencias');
     wsDetail.columns = [
       { header: 'Estatus', key: 'status', width: 12 },
