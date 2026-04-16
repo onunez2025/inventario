@@ -294,7 +294,7 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
       {/* Custom Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[40px] p-8 w-full max-sm shadow-2xl animate-in zoom-in-95 duration-300 text-center">
+          <div className="bg-white rounded-[40px] p-8 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-300 text-center">
             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertCircle className="text-red-500" size={40} />
             </div>
