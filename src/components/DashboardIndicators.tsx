@@ -114,11 +114,11 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
     <div className="space-y-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Widget: Resumen por Grupo de Articulo */}
+        {/* Widget: Resumen por Tipo (Ejecutivo) */}
         <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
           <div className="p-4 sm:p-6 pb-2 flex justify-between items-center">
             <div>
-              <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Grupo de Artículo</h3>
+              <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen Ejecutivo por Tipo</h3>
               <button 
                 onClick={() => excelService.exportInventoryReport(data, tiendaNombre || 'S/N')}
                 className="mt-2 flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-full shadow-lg shadow-green-500/20 active:scale-95 transition-all"
@@ -133,17 +133,17 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
             <table className="w-full text-left">
               <thead className="sticky top-0 bg-white z-10">
                 <tr className="border-b border-gray-50">
-                  <th className="py-3 text-[10px] uppercase font-black text-gray-400">Grupo de artículos</th>
+                  <th className="py-3 text-[10px] uppercase font-black text-gray-400">Tipo de Artículo</th>
                   <th className="py-3 text-[10px] uppercase font-black text-gray-400 text-right">Valor Dif</th>
                   <th className="py-3 w-8"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {categoryData.map((cat, idx) => (
+                {typeData.map((type, idx) => (
                   <tr key={idx} className="group hover:bg-gray-50 transition-colors">
-                    <td className="py-4 text-xs font-black text-gray-700 uppercase">{cat.name}</td>
-                    <td className={`py-4 text-xs font-bold text-right ${cat.value < 0 ? 'text-red-500' : 'text-green-600'}`}>
-                      {formatCurrency(cat.value)}
+                    <td className="py-4 text-xs font-black text-gray-700 uppercase">{type.name}</td>
+                    <td className={`py-4 text-xs font-bold text-right ${type.value < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                      {formatCurrency(type.value)}
                     </td>
                     <td className="py-4 text-right">
                       <ChevronRight size={14} className="text-gray-300 group-hover:text-primary group-hover:translate-x-1 transition-all" />
@@ -316,26 +316,26 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
           </div>
         </div>
 
-        {/* Widget: Resumen por Tipo (Producto/Suministro/Bonificación) */}
+        {/* Widget: Resumen por Categoría */}
         <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
            <div className="p-4 sm:p-6 pb-2 flex justify-between items-center">
             <div className="flex items-center gap-3">
-               <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Tipo</h3>
-               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-500 uppercase">Auditado</span>
+               <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Categoría</h3>
+               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-gray-100 text-gray-500 uppercase">{categoryData.length} Categorías</span>
             </div>
-            <Package size={18} className="text-blue-500 opacity-20" />
+            <Filter size={18} className="text-primary opacity-20" />
           </div>
           <div className="flex-1 overflow-auto px-6 pb-6 scrollbar-hide">
              <div className="space-y-4">
-               {typeData.map((type, idx) => (
+               {categoryData.map((cat, idx) => (
                  <div key={idx} className="bg-gray-50/50 p-4 rounded-3xl border border-gray-100 flex justify-between items-center group hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all active:scale-95 cursor-pointer">
                     <div>
-                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tipo de Articulo</p>
-                       <p className="text-xs font-black text-gray-800 uppercase group-hover:text-primary transition-colors">{type.name}</p>
+                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Categoría</p>
+                       <p className="text-xs font-black text-gray-800 uppercase group-hover:text-primary transition-colors">{cat.name}</p>
                     </div>
                     <div className="text-right">
-                       <p className={`text-sm font-black ${type.value < 0 ? 'text-red-500' : 'text-green-600'}`}>
-                          {formatCurrency(type.value)}
+                       <p className={`text-sm font-black ${cat.value < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                          {formatCurrency(cat.value)}
                        </p>
                        <p className="text-[9px] font-bold text-gray-400">VALOR DIF.</p>
                     </div>

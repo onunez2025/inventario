@@ -23,7 +23,7 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
   const [importLoading, setImportLoading] = useState(false);
 
   const handleDownloadTemplate = () => {
-    const csvContent = "data:text/csv;charset=utf-8,sku,nombre,categoria,costo_unitario\nSKU-123,Producto Ejemplo,Abarrotes,10.50";
+    const csvContent = "data:text/csv;charset=utf-8,sku,nombre,categoria,marca,tipo,costo_unitario\nSKU-123,Producto Ejemplo,Abarrotes,MARCA-X,PRODUCTO,10.50";
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -52,9 +52,11 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
           const sku = p[0]?.replace(/^"|"$/g, '').trim();
           const nombre = p[1]?.replace(/^"|"$/g, '').trim();
           const categoria = p[2]?.replace(/^"|"$/g, '').trim() || '';
-          const costo_unitario = parseFloat(p[3]?.replace(/^"|"$/g, '').trim()) || 0;
+          const marca = p[3]?.replace(/^"|"$/g, '').trim() || '';
+          const tipo = p[4]?.replace(/^"|"$/g, '').trim() || 'PRODUCTO';
+          const costo_unitario = parseFloat(p[5]?.replace(/^"|"$/g, '').trim()) || 0;
           if (!sku || !nombre) throw new Error('Formato inválido: falta SKU o nombre');
-          return { sku, nombre, categoria, costo_unitario, stock_sistema: 0 };
+          return { sku, nombre, categoria, marca, tipo, costo_unitario, stock_sistema: 0 };
         });
 
         if (records.length === 0) throw new Error('Archivo vacío');
@@ -187,7 +189,8 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
                 <p className="font-bold text-sm">{item.nombre}</p>
                 <div className="flex gap-2 mt-1">
                   <p className="text-[10px] text-on-surface/50 uppercase tracking-widest font-bold">SKU: {item.sku}</p>
-                  {item.categoria && <p className="text-[9px] bg-secondary/10 text-secondary px-1.5 rounded">{item.categoria}</p>}
+                  {item.categoria && <p className="text-[9px] bg-secondary/10 text-secondary px-1.5 rounded uppercase font-bold">{item.categoria}</p>}
+                  {item.tipo && <p className="text-[9px] bg-blue-100 text-blue-600 px-1.5 rounded uppercase font-bold">{item.tipo}</p>}
                 </div>
               </div>
               <div className="text-right">

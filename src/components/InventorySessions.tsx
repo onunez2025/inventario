@@ -30,7 +30,6 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [newTienda, setNewTienda] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-
   const [showConfirm, setShowConfirm] = useState<Inventario | null>(null);
 
   useEffect(() => {
@@ -275,13 +274,27 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
             >
               Crea el primero ahora
             </button>
+          </div>
         )}
+      </div>
+
+      {/* Info Card */}
+      <div className="bg-gray-50/50 border border-gray-100 rounded-[32px] p-8 flex gap-6 items-start">
+        <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
+          <Shield className="text-primary" size={24} />
+        </div>
+        <div className="space-y-1">
+          <h4 className="font-bold text-gray-800">Control de Sesiones</h4>
+          <p className="text-sm text-gray-500 leading-relaxed">
+            Solo una sesión abierta puede estar "Activa" para la toma física. Al cerrar un inventario, se congela la conciliación para auditoría externa y ya no se podrán añadir nuevos hallazgos.
+          </p>
+        </div>
       </div>
 
       {/* Custom Confirmation Modal */}
       {showConfirm && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
-          <div className="bg-white rounded-[40px] p-8 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-300 text-center">
+          <div className="bg-white rounded-[40px] p-8 w-full max-sm shadow-2xl animate-in zoom-in-95 duration-300 text-center">
             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <AlertCircle className="text-red-500" size={40} />
             </div>
@@ -310,19 +323,6 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
           </div>
         </div>
       )}
-
-      {/* Info Card */}
-      <div className="bg-gray-50/50 border border-gray-100 rounded-[32px] p-8 flex gap-6 items-start">
-        <div className="p-3 bg-white rounded-2xl shadow-sm border border-gray-50">
-          <Shield className="text-primary" size={24} />
-        </div>
-        <div className="space-y-1">
-          <h4 className="font-bold text-gray-800">Control de Sesiones</h4>
-          <p className="text-sm text-gray-500 leading-relaxed">
-            Solo una sesión abierta puede estar "Activa" para la toma física. Al cerrar un inventario, se congela la conciliación para auditoría externa y ya no se podrán añadir nuevos hallazgos.
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
