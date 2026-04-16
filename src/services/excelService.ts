@@ -179,7 +179,7 @@ export const excelService = {
         vCell.font = { color: { argb: value < 0 ? 'FFEF4444' : 'FF065F46' } };
       });
 
-    const categoryStart = currentIdx;
+    const categoryStart = brandStart + 2 + Object.keys(brandMap).length + 2;
     wsSummary.getCell(`B${categoryStart}`).value = 'RESUMEN POR CATEGORÍA';
     wsSummary.getCell(`B${categoryStart}`).font = { bold: true, color: { argb: 'FF1E3A8A' } };
     wsSummary.getRow(categoryStart + 1).values = ['', 'Categoría', 'Valorización Dif.'];
