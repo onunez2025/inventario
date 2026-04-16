@@ -31,6 +31,8 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
   const [newTienda, setNewTienda] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
+  const [showConfirm, setShowConfirm] = useState<Inventario | null>(null);
+
   useEffect(() => {
     fetchInventarios();
   }, []);
@@ -77,10 +79,6 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
   };
 
   const handleCloseInventory = async (inv: Inventario) => {
-    if (!window.confirm(`¿Está seguro que desea cerrar el inventario de "${inv.tienda_nombre}"? Esta acción no se puede deshacer.`)) {
-      return;
-    }
-
     setActionLoading(inv.id);
     const { error } = await supabase
       .from('inventarios')
@@ -94,6 +92,7 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
       alert('Error al cerrar inventario: ' + error.message);
     } else {
       fetchInventarios();
+      setShowConfirm(null);
     }
     setActionLoading(null);
   };
@@ -243,7 +242,7 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
                     )}
                     
                     <button 
-                      onClick={() => handleCloseInventory(inv)}
+                      onClick={() => setShowConfirm(inv)}
                       disabled={actionLoading === inv.id}
                       className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
                       title="Cerrar Inventario"
@@ -276,9 +275,41 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
             >
               Crea el primero ahora
             </button>
-          </div>
         )}
       </div>
+
+      {/* Custom Confirmation Modal */}
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-md z-[300] flex items-center justify-center p-4">
+          <div className="bg-white rounded-[40px] p-8 w-full max-w-sm shadow-2xl animate-in zoom-in-95 duration-300 text-center">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="text-red-500" size={40} />
+            </div>
+            
+            <h3 className="text-2xl font-display font-black text-gray-800 mb-2">¿Cerrar Inventario?</h3>
+            <p className="text-gray-500 text-sm font-medium mb-8 leading-relaxed">
+              Estás por finalizar la sesión de <span className="text-gray-800 font-bold">"{showConfirm.tienda_nombre}"</span>. <br/>
+              Esta acción no se puede deshacer y los datos serán congelados.
+            </p>
+            
+            <div className="flex flex-col gap-3">
+              <button 
+                onClick={() => handleCloseInventory(showConfirm)}
+                disabled={actionLoading === showConfirm.id}
+                className="w-full py-4 bg-red-500 text-white font-bold rounded-2xl hover:bg-red-600 transition-all shadow-lg shadow-red-200 flex items-center justify-center gap-2"
+              >
+                {actionLoading === showConfirm.id ? <Loader2 className="animate-spin" size={20} /> : 'Sí, Cerrar Ahora'}
+              </button>
+              <button 
+                onClick={() => setShowConfirm(null)}
+                className="w-full py-4 bg-gray-100 text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition-all"
+              >
+                No, Mantener Abierto
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Info Card */}
       <div className="bg-gray-50/50 border border-gray-100 rounded-[32px] p-8 flex gap-6 items-start">

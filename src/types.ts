@@ -7,6 +7,7 @@ export interface Articulo {
   stock_sistema: number;
   categoria?: string;
   marca?: string;
+  tipo?: string;
 }
 
 export interface Inventario {
@@ -46,6 +47,7 @@ export interface ConciliacionRecord {
   articulo_nombre: string;
   categoria?: string;
   marca?: string;
+  tipo?: string;
   costo_unitario: number;
   stock_sistema: number;
   cantidad_fisica: number;

@@ -51,6 +51,18 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => a.value - b.value);
 
+  // 3. Agregación por Tipo (Producto, Suministro, Bonificación)
+  const typeMap = data.reduce((acc, curr) => {
+    const type = curr.tipo || 'PRODUCTO';
+    const valor = Number(curr.diferencia_valorizada || 0);
+    acc[type] = (acc[type] || 0) + valor;
+    return acc;
+  }, {} as Record<string, number>);
+
+  const typeData = Object.entries(typeMap)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => a.value - b.value);
+
   // 3. Resultados por Estado
   const statusSummary = {
     Faltante: { 
@@ -276,7 +288,7 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
         </div>
 
         {/* Widget: Resumen por Marca (Nuevo) */}
-        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px] lg:col-span-2">
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
            <div className="p-4 sm:p-6 pb-2 flex justify-between items-center">
             <div className="flex items-center gap-3">
                <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Marca</h3>
@@ -285,7 +297,7 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
             <TrendingDown size={18} className="text-primary opacity-20" />
           </div>
           <div className="flex-1 overflow-auto px-6 pb-6 scrollbar-hide">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+             <div className="space-y-4">
                {brandData.map((brand, idx) => (
                  <div key={idx} className="bg-gray-50/50 p-4 rounded-3xl border border-gray-100 flex justify-between items-center group hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all active:scale-95 cursor-pointer">
                     <div>
@@ -300,7 +312,36 @@ const DashboardIndicators: React.FC<DashboardIndicatorsProps> = ({ data, tiendaN
                     </div>
                  </div>
                ))}
+             </div>
+          </div>
+        </div>
+
+        {/* Widget: Resumen por Tipo (Producto/Suministro/Bonificación) */}
+        <div className="bg-white rounded-[2.5rem] shadow-sm border border-gray-100 overflow-hidden flex flex-col h-[400px]">
+           <div className="p-4 sm:p-6 pb-2 flex justify-between items-center">
+            <div className="flex items-center gap-3">
+               <h3 className="text-sm font-black uppercase tracking-widest text-gray-400">Resumen por Tipo</h3>
+               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-500 uppercase">Auditado</span>
             </div>
+            <Package size={18} className="text-blue-500 opacity-20" />
+          </div>
+          <div className="flex-1 overflow-auto px-6 pb-6 scrollbar-hide">
+             <div className="space-y-4">
+               {typeData.map((type, idx) => (
+                 <div key={idx} className="bg-gray-50/50 p-4 rounded-3xl border border-gray-100 flex justify-between items-center group hover:bg-white hover:shadow-xl hover:shadow-gray-200/50 transition-all active:scale-95 cursor-pointer">
+                    <div>
+                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Tipo de Articulo</p>
+                       <p className="text-xs font-black text-gray-800 uppercase group-hover:text-primary transition-colors">{type.name}</p>
+                    </div>
+                    <div className="text-right">
+                       <p className={`text-sm font-black ${type.value < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                          {formatCurrency(type.value)}
+                       </p>
+                       <p className="text-[9px] font-bold text-gray-400">VALOR DIF.</p>
+                    </div>
+                 </div>
+               ))}
+             </div>
           </div>
         </div>
 

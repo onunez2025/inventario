@@ -19,6 +19,7 @@ export const ItemModal: React.FC<ItemModalProps> = ({ articulo, initialSku, onCl
     marca: articulo?.marca || '',
     costo_unitario: articulo?.costo_unitario || 0,
     stock_sistema: articulo?.stock_sistema || 0,
+    tipo: articulo?.tipo || 'PRODUCTO',
     descripcion: articulo?.descripcion || ''
   });
   const [loading, setLoading] = useState(false);
@@ -144,6 +145,20 @@ export const ItemModal: React.FC<ItemModalProps> = ({ articulo, initialSku, onCl
               onChange={(val) => setFormData({ ...formData, marca: val })}
               placeholder="Seleccionar marca..."
             />
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase font-bold text-on-surface/50 ml-1">Tipo de Artículo</label>
+            <select 
+              required
+              className="input-field appearance-none"
+              value={formData.tipo}
+              onChange={e => setFormData({ ...formData, tipo: e.target.value })}
+            >
+              <option value="PRODUCTO">PRODUCTO</option>
+              <option value="SUMINISTRO">SUMINISTRO</option>
+              <option value="BONIFICACION">BONIFICACIÓN</option>
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

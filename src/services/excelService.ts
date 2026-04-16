@@ -24,6 +24,13 @@ export const excelService = {
       return acc;
     }, {} as Record<string, number>);
 
+    const typeMap = data.reduce((acc, curr) => {
+      const type = curr.tipo || 'PRODUCTO';
+      const valor = Number(curr.diferencia_valorizada || 0);
+      acc[type] = (acc[type] || 0) + valor;
+      return acc;
+    }, {} as Record<string, number>);
+
     const statusSummary = {
       Faltante: { skus: 0, valor: 0 },
       Sobrante: { skus: 0, valor: 0 },
@@ -138,8 +145,24 @@ export const excelService = {
       vCell.font = { color: { argb: Number(st[2]) < 0 ? 'FFEF4444' : 'FF065F46' } };
     });
 
-    let currentIdx = 22;
-    // (Rest of categorization logic would go here if needed, keeping it minimal for brevity)
+    const typeStart = 22;
+    wsSummary.getCell(`B${typeStart}`).value = 'RESUMEN POR TIPO DE ARTÍCULO';
+    wsSummary.getCell(`B${typeStart}`).font = { bold: true, color: { argb: 'FF1E3A8A' } };
+    wsSummary.getRow(typeStart + 1).values = ['', 'Tipo', 'Valorización Dif.'];
+    applyTableHeader(`B${typeStart + 1}:C${typeStart + 1}`, 'FF1E3A8A');
+
+    Object.entries(typeMap).forEach(([name, value], i) => {
+      const rowIndex = typeStart + 2 + i;
+      const row = wsSummary.getRow(rowIndex);
+      row.getCell(2).value = name.toUpperCase();
+      const vCell = row.getCell(3);
+      vCell.value = value;
+      vCell.numFmt = '"S/ " #,##0.00;[Red]"-S/ " #,##0.00';
+      vCell.font = { color: { argb: value < 0 ? 'FFEF4444' : 'FF065F46' } };
+    });
+
+    let currentIdx = typeStart + 2 + Object.keys(typeMap).length + 2;
+    // (Categorization logic...)
 
     // SHEET 2: DETALLE DE DIFERENCIAS
     const wsDetail = workbook.addWorksheet('Detalle de Diferencias');
@@ -148,6 +171,7 @@ export const excelService = {
       { header: 'SKU', key: 'sku', width: 18 },
       { header: 'Nombre del Artículo', key: 'nombre', width: 45 },
       { header: 'Marca', key: 'marca', width: 15 },
+      { header: 'Tipo', key: 'tipo', width: 15 },
       { header: 'Categoría', key: 'categoria', width: 20 },
       { header: 'Costo Unit.', key: 'costo', width: 12 },
       { header: 'Stock Sis.', key: 'sistema', width: 12 },
@@ -175,6 +199,7 @@ export const excelService = {
         sku: r.sku,
         nombre: r.articulo_nombre.toUpperCase(),
         marca: (r.marca || 'S/N').toUpperCase(),
+        tipo: (r.tipo || 'PRODUCTO').toUpperCase(),
         categoria: (r.categoria || 'S/N').toUpperCase(),
         costo: Number(r.costo_unitario),
         sistema: Number(r.stock_sistema),
