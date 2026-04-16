@@ -13,7 +13,6 @@ import {
   ChevronRight,
   Power
 } from 'lucide-react';
-import { ClosingInventoryModal } from './ClosingInventoryModal';
 import type { Inventario } from '../types';
 
 interface InventorySessionsProps {
@@ -31,7 +30,6 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
   const [isCreating, setIsCreating] = useState(false);
   const [newTienda, setNewTienda] = useState('');
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [closingInventory, setClosingInventory] = useState<Inventario | null>(null);
 
   useEffect(() => {
     fetchInventarios();
@@ -78,8 +76,26 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
     setActionLoading(null);
   };
 
-  const handleCloseInventory = (inv: Inventario) => {
-    setClosingInventory(inv);
+  const handleCloseInventory = async (inv: Inventario) => {
+    if (!window.confirm(`¿Está seguro que desea cerrar el inventario de "${inv.tienda_nombre}"? Esta acción no se puede deshacer.`)) {
+      return;
+    }
+
+    setActionLoading(inv.id);
+    const { error } = await supabase
+      .from('inventarios')
+      .update({
+        estado: 'cerrado',
+        fecha_fin: new Date().toISOString()
+      })
+      .eq('id', inv.id);
+
+    if (error) {
+      alert('Error al cerrar inventario: ' + error.message);
+    } else {
+      fetchInventarios();
+    }
+    setActionLoading(null);
   };
 
   const getStatusBadge = (estado: string) => {
@@ -276,17 +292,6 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
           </p>
         </div>
       </div>
-      {/* Closing Modal */}
-      {closingInventory && (
-        <ClosingInventoryModal 
-          inventory={closingInventory}
-          onClose={() => setClosingInventory(null)}
-          onSuccess={() => {
-            fetchInventarios();
-            setClosingInventory(null);
-          }}
-        />
-      )}
     </div>
   );
 };
