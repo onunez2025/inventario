@@ -245,7 +245,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
                     <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                       {perfil.nombre || 'Sin nombre'}
                       {perfil.rol === 'administrador' && <Shield size={14} className="text-amber-500" />}
-                      {perfil.pin_seguridad && <Key size={12} className="text-green-500" title="PIN Configurado" />}
+                      {perfil.pin_seguridad && <Key size={12} className="text-green-500" />}
                     </h3>
                   )}
                   <p className="text-sm text-gray-400 font-medium">{perfil.email}</p>

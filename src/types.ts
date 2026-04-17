@@ -36,6 +36,7 @@ export interface Perfil {
   email: string;
   nombre: string;
   rol: UserRole;
+  pin_seguridad?: string;
   created_at?: string;
 }
 
