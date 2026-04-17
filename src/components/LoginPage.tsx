@@ -174,7 +174,7 @@ export const LoginPage: React.FC = () => {
         </div>
         
         <div className="bg-surface-container-low/50 p-8 text-center border-t border-on-surface/5">
-           <p className="text-[10px] text-on-surface/60 font-black uppercase tracking-[0.3em]">© 2026 MT INDUSTRIAL S.A.C • Sistema Interno</p>
+           <p className="text-[10px] text-on-surface/60 font-black uppercase tracking-[0.3em]">© 2026 NoCodeCreator • Sistema Interno</p>
         </div>
       </div>
     </div>

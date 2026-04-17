@@ -49,4 +49,4 @@ Una vez que tengas las herramientas, abre una terminal en tu computadora y sigue
 Copia el archivo `app-debug.apk` a los celulares de los operarios e instálalo. Si el celular te pide permiso para "Instalar aplicaciones de fuentes desconocidas", acéptalo.
 
 ---
-**MT INDUSTRIAL S.A.C - Sistema de Inventarios Inteligente**
+**NoCodeCreator - Sistema de Inventarios Inteligente**
