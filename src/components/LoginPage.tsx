@@ -67,7 +67,7 @@ export const LoginPage: React.FC = () => {
           <h1 className="text-5xl font-display font-black tracking-tighter mb-2">
             Invent<span className="text-secondary">-IA</span>
           </h1>
-          <p className="text-blue-100/60 text-[10px] font-black uppercase tracking-[0.2em]">Gestión Inteligente de Activos</p>
+          <p className="text-blue-100/70 text-[10px] font-black uppercase tracking-[0.2em]">Gestión Inteligente de Activos</p>
         </div>
 
         {/* Form Section */}
@@ -89,9 +89,9 @@ export const LoginPage: React.FC = () => {
           {view === 'login' ? (
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[11px] uppercase font-black text-on-surface/40 ml-1 tracking-widest">Correo Electrónico</label>
+                <label className="text-[11px] uppercase font-black text-on-surface/70 ml-1 tracking-widest">Correo Electrónico</label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface/20 group-focus-within:text-primary transition-colors" size={20} />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface/40 group-focus-within:text-primary transition-colors" size={20} />
                   <input 
                     type="email" 
                     required
@@ -105,7 +105,7 @@ export const LoginPage: React.FC = () => {
 
               <div className="space-y-2">
                 <div className="flex justify-between items-center ml-1">
-                  <label className="text-[11px] uppercase font-black text-on-surface/40 tracking-widest">Contraseña</label>
+                  <label className="text-[11px] uppercase font-black text-on-surface/70 tracking-widest">Contraseña</label>
                   <button 
                     type="button"
                     onClick={() => setView('recovery')}
@@ -115,7 +115,7 @@ export const LoginPage: React.FC = () => {
                   </button>
                 </div>
                 <div className="relative group">
-                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface/20 group-focus-within:text-primary transition-colors" size={20} />
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface/40 group-focus-within:text-primary transition-colors" size={20} />
                   <input 
                     type="password" 
                     required
@@ -139,9 +139,9 @@ export const LoginPage: React.FC = () => {
           ) : (
             <form onSubmit={handleRecovery} className="space-y-6">
               <div className="space-y-2">
-                <label className="text-[11px] uppercase font-black text-on-surface/40 ml-1 tracking-widest">Correo de Recuperación</label>
+                <label className="text-[11px] uppercase font-black text-on-surface/70 ml-1 tracking-widest">Correo de Recuperación</label>
                 <div className="relative group">
-                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface/20 group-focus-within:text-primary transition-colors" size={20} />
+                  <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface/40 group-focus-within:text-primary transition-colors" size={20} />
                   <input 
                     type="email" 
                     required
@@ -165,7 +165,7 @@ export const LoginPage: React.FC = () => {
               <button 
                 type="button" 
                 onClick={() => setView('login')}
-                className="w-full text-xs font-black text-on-surface/30 flex items-center justify-center gap-2 hover:text-primary transition-all uppercase tracking-widest"
+                className="w-full text-xs font-black text-on-surface/60 flex items-center justify-center gap-2 hover:text-primary transition-all uppercase tracking-widest"
               >
                 <ArrowLeft size={16} /> Volver al inicio
               </button>
@@ -174,7 +174,7 @@ export const LoginPage: React.FC = () => {
         </div>
         
         <div className="bg-surface-container-low/50 p-8 text-center border-t border-on-surface/5">
-           <p className="text-[10px] text-on-surface/30 font-black uppercase tracking-[0.3em]">© 2026 MT INDUSTRIAL S.A.C • Sistema Interno</p>
+           <p className="text-[10px] text-on-surface/60 font-black uppercase tracking-[0.3em]">© 2026 MT INDUSTRIAL S.A.C • Sistema Interno</p>
         </div>
       </div>
     </div>

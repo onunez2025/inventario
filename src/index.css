@@ -96,6 +96,11 @@
     background: rgba(255, 255, 255, 0.1);
   }
 
+  .glass {
+    @apply backdrop-blur-xl border border-white/30 shadow-xl;
+    background: rgba(255, 255, 255, 0.4);
+  }
+
   .btn-glass:hover {
     @apply bg-white/20 -translate-y-0.5 shadow-xl;
   }

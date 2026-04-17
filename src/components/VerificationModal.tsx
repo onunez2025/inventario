@@ -71,7 +71,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full">Verificación Activa</span>
-                <span className="text-[10px] font-bold text-on-surface/40 uppercase tracking-widest">SKU: {articulo.sku}</span>
+                <span className="text-[10px] font-bold text-on-surface/60 uppercase tracking-widest">SKU: {articulo.sku}</span>
               </div>
               <h2 className="text-3xl font-display font-black text-on-surface leading-tight">{articulo.nombre}</h2>
             </div>
@@ -86,10 +86,10 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
           {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-white/50 border border-black/5 p-5 rounded-3xl">
-              <p className="text-[10px] uppercase opacity-40 font-black tracking-widest mb-1">Stock Sistema</p>
+              <p className="text-[10px] uppercase opacity-70 font-black tracking-widest mb-1">Stock Sistema</p>
               <div className="flex items-baseline gap-1">
                 <p className="text-2xl font-black">{articulo.stock_sistema}</p>
-                <p className="text-xs font-bold opacity-40 uppercase">Unid</p>
+                <p className="text-xs font-bold opacity-60 uppercase">Unid</p>
               </div>
             </div>
             <div className="bg-primary/5 border border-primary/10 p-5 rounded-3xl">
@@ -103,11 +103,11 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
 
           {/* Input Section */}
           <div className="space-y-3">
-            <label className="text-xs font-black uppercase tracking-[0.2em] text-on-surface/40 px-1">
+            <label className="text-xs font-black uppercase tracking-[0.2em] text-on-surface/60 px-1">
                Cantidad Detectada Física
             </label>
             <div className="relative group">
-              <div className="absolute left-6 top-1/2 -translate-y-1/2 text-on-surface/20 group-focus-within:text-primary transition-colors">
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 text-on-surface/40 group-focus-within:text-primary transition-colors">
                 <Calculator size={24} />
               </div>
               <input 
@@ -137,7 +137,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                       <span className="text-xs font-black px-2 py-0.5 bg-red-500/10 text-red-500 rounded-md">Alerta de Merma</span>
                     )}
                   </div>
-                  <p className="text-xs opacity-50 mt-1 font-medium italic">
+                  <p className="text-xs opacity-70 mt-1 font-medium italic">
                     {diferencia === 0 ? 'Los datos coinciden plenamente con el sistema.' : `Impacto proyectado en inventario: S/. ${Math.abs(impactoEconomico).toLocaleString()}`}
                   </p>
                 </div>
@@ -148,7 +148,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
           {/* Observations & Photo */}
           <div className="flex gap-4">
             <div className="flex-1 space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-on-surface/30 px-1">Notas de Campo</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-on-surface/60 px-1">Notas de Campo</label>
               <textarea 
                 className="w-full bg-white/50 border border-black/5 p-4 rounded-3xl min-h-[100px] text-sm focus:bg-white outline-none transition-all placeholder:opacity-30"
                 placeholder="Describa el estado físico, ubicación o anomalías..."
@@ -157,7 +157,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
               />
             </div>
             <div className="w-24 space-y-2">
-               <label className="text-[10px] font-black uppercase tracking-widest text-on-surface/30 px-1">Evidencia</label>
+               <label className="text-[10px] font-black uppercase tracking-widest text-on-surface/60 px-1">Evidencia</label>
                <label className="relative block w-full aspect-square bg-white/50 border border-black/5 rounded-3xl overflow-hidden cursor-pointer hover:bg-white hover:border-primary/20 transition-all group">
                   <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files && setFoto(e.target.files[0])} />
                   {foto ? (
@@ -165,7 +165,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
                       Imagen Cargada
                     </div>
                   ) : (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-on-surface/20 group-hover:text-primary transition-colors">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-on-surface/40 group-hover:text-primary transition-colors">
                       <Camera size={28} />
                     </div>
                   )}
@@ -193,7 +193,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
               )}
             </button>
             
-            <div className="flex items-center justify-center gap-2 py-2 opacity-30">
+            <div className="flex items-center justify-center gap-2 py-2 opacity-60">
               <Info size={14} />
               <p className="text-[9px] font-bold uppercase tracking-widest">Dato asegurado con auditoría biométrica y GPS</p>
             </div>

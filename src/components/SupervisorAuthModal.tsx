@@ -74,7 +74,7 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
               <ShieldCheck size={32} />
             </div>
             <h3 className="text-2xl font-display font-black text-on-surface uppercase tracking-tighter">Autorización</h3>
-            <p className="text-xs font-bold text-on-surface/40 uppercase tracking-widest leading-relaxed">
+            <p className="text-xs font-bold text-on-surface/70 uppercase tracking-widest leading-relaxed">
               Intervención requerida para:<br />
               <span className="text-primary opacity-100 font-black">SKU {sku}</span>
             </p>
@@ -88,7 +88,7 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
                 className={`w-14 h-18 border-2 rounded-2xl flex items-center justify-center text-3xl font-black transition-all duration-300 ${
                   pin.length > i 
                     ? 'border-primary text-primary bg-primary/5 shadow-[0_0_15px_rgba(0,49,120,0.1)]' 
-                    : 'border-black/5 text-on-surface/5 bg-transparent'
+                    : 'border-black/10 text-on-surface/10 bg-black/[0.02]'
                 } ${error ? 'border-red-500/50 text-red-500 bg-red-500/5 animate-pulse' : ''}`}
               >
                 {pin.length > i ? '•' : ''}
@@ -118,7 +118,7 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
             <button
               type="button"
               onClick={handleClear}
-              className="h-16 flex items-center justify-center text-[10px] font-black text-on-surface/30 hover:text-red-500 uppercase tracking-widest transition-all"
+              className="h-16 flex items-center justify-center text-[11px] font-black text-on-surface/60 hover:text-red-600 uppercase tracking-widest transition-all"
             >
               LIMPIAR
             </button>
@@ -136,7 +136,7 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
               className={`h-16 rounded-3xl flex items-center justify-center text-white transition-all shadow-xl active:scale-95 ${
                 pin.length === 4 
                   ? 'bg-secondary shadow-secondary/20 font-black' 
-                  : 'bg-black/5 text-on-surface/10 grayscale pointer-events-none'
+                  : 'bg-black/5 text-on-surface/30 grayscale pointer-events-none'
               }`}
             >
               {loading ? (
@@ -149,7 +149,7 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
 
           <button 
             onClick={onClose}
-            className="w-full py-4 text-[10px] font-black text-on-surface/20 hover:text-red-500 transition-all uppercase tracking-[0.3em]"
+            className="w-full py-4 text-[11px] font-black text-on-surface/50 hover:text-red-600 transition-all uppercase tracking-[0.3em]"
           >
             Cancelar Proceso
           </button>
