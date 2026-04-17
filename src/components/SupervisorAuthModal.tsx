@@ -27,24 +27,22 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
     setError(null);
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('configuracion')
-        .select('valor')
-        .eq('clave', 'supervisor_pin')
-        .single();
+      // Llamada segura a la función de la base de datos
+      const { data, error: rpcError } = await supabase.rpc('validar_autorizacion_supervisor', {
+        p_pin: pin
+      });
 
-      if (fetchError || !data) {
-        throw new Error('No se pudo validar el PIN');
-      }
+      if (rpcError) throw rpcError;
 
-      if (data.valor === pin) {
+      if (data.success) {
         onSuccess();
         setPin('');
       } else {
-        setError('PIN incorrecto. Autorización denegada.');
+        setError(data.error || 'PIN incorrecto. Autorización denegada.');
+        setPin('');
       }
     } catch (err: any) {
-      setError(err.message);
+      setError('Error de conexión o validación. Intente nuevamente.');
     } finally {
       setLoading(false);
     }
@@ -63,33 +61,35 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-70 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-        {/* Header */}
-        <div className="bg-primary px-6 py-4 flex justify-between items-center text-white">
-          <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5" />
-            <h3 className="font-semibold text-lg">Autorización</h3>
-          </div>
-          <button onClick={onClose} className="hover:bg-white/20 p-1 rounded-full transition-colors">
-            <X className="w-6 h-6" />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl animate-in fade-in duration-500">
+      <div className="glass w-full max-w-sm rounded-[3rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
+        
+        {/* Header Decorator */}
+        <div className="h-2 w-full bg-gradient-to-r from-primary via-secondary to-primary" />
 
-        {/* Content */}
-        <div className="p-6">
-          <div className="text-center mb-6">
-            <p className="text-gray-600 mb-1">Se requiere autorización de supervisor para registrar:</p>
-            <p className="font-mono font-bold text-primary bg-blue-50 py-1 rounded-lg">{sku}</p>
+        <div className="p-10">
+          {/* Header */}
+          <div className="text-center space-y-3 mb-10">
+            <div className="inline-flex p-4 rounded-3xl bg-primary/10 text-primary border border-primary/10">
+              <ShieldCheck size={32} />
+            </div>
+            <h3 className="text-2xl font-display font-black text-on-surface uppercase tracking-tighter">Autorización</h3>
+            <p className="text-xs font-bold text-on-surface/40 uppercase tracking-widest leading-relaxed">
+              Intervención requerida para:<br />
+              <span className="text-primary opacity-100 font-black">SKU {sku}</span>
+            </p>
           </div>
 
-          <div className="flex justify-center gap-4 mb-8">
+          {/* PIN Indicators */}
+          <div className="flex justify-center gap-4 mb-10">
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className={`w-12 h-16 border-2 rounded-xl flex items-center justify-center text-3xl font-bold transition-all duration-200 ${
-                  pin.length > i ? 'border-primary text-primary bg-blue-50 shadow-inner' : 'border-gray-200 text-gray-300'
-                } ${error ? 'border-red-400 text-red-500 bg-red-50' : ''}`}
+                className={`w-14 h-18 border-2 rounded-2xl flex items-center justify-center text-3xl font-black transition-all duration-300 ${
+                  pin.length > i 
+                    ? 'border-primary text-primary bg-primary/5 shadow-[0_0_15px_rgba(0,49,120,0.1)]' 
+                    : 'border-black/5 text-on-surface/5 bg-transparent'
+                } ${error ? 'border-red-500/50 text-red-500 bg-red-500/5 animate-pulse' : ''}`}
               >
                 {pin.length > i ? '•' : ''}
               </div>
@@ -97,20 +97,20 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-red-500 text-sm mb-6 bg-red-50 p-3 rounded-lg border border-red-100 animate-shake">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <div className="flex items-center gap-2 text-red-600 text-[10px] font-black uppercase tracking-widest mb-8 bg-red-500/5 p-4 rounded-2xl border border-red-500/10">
+              <AlertCircle size={16} />
               <p>{error}</p>
             </div>
           )}
 
           {/* Numpad */}
-          <div className="grid grid-cols-3 gap-3 mb-6">
+          <div className="grid grid-cols-3 gap-4 mb-8">
             {['1', '2', '3', '4', '5', '6', '7', '8', '9'].map((num) => (
               <button
                 key={num}
                 type="button"
                 onClick={() => handleKeyClick(num)}
-                className="h-14 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xl font-bold rounded-xl active:bg-primary active:text-white transition-all shadow-sm active:shadow-inner"
+                className="h-16 glass hover:bg-white text-on-surface text-2xl font-black rounded-3xl active:scale-90 transition-all shadow-sm flex items-center justify-center"
               >
                 {num}
               </button>
@@ -118,14 +118,14 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
             <button
               type="button"
               onClick={handleClear}
-              className="h-14 text-sm font-semibold text-gray-500 hover:text-red-500 transition-colors"
+              className="h-16 flex items-center justify-center text-[10px] font-black text-on-surface/30 hover:text-red-500 uppercase tracking-widest transition-all"
             >
-              Borrar
+              LIMPIAR
             </button>
             <button
               type="button"
               onClick={() => handleKeyClick('0')}
-              className="h-14 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xl font-bold rounded-xl active:bg-primary active:text-white transition-all shadow-sm active:shadow-inner"
+              className="h-16 glass hover:bg-white text-on-surface text-2xl font-black rounded-3xl active:scale-90 transition-all shadow-sm flex items-center justify-center"
             >
               0
             </button>
@@ -133,13 +133,26 @@ const SupervisorAuthModal: React.FC<SupervisorAuthModalProps> = ({ isOpen, onClo
               type="button"
               disabled={loading || pin.length !== 4}
               onClick={handleSubmit}
-              className={`h-14 rounded-xl flex items-center justify-center text-white transition-all shadow-lg ${
-                pin.length === 4 ? 'bg-secondary hover:bg-secondary/90 active:scale-95' : 'bg-gray-300 cursor-not-allowed'
+              className={`h-16 rounded-3xl flex items-center justify-center text-white transition-all shadow-xl active:scale-95 ${
+                pin.length === 4 
+                  ? 'bg-secondary shadow-secondary/20 font-black' 
+                  : 'bg-black/5 text-on-surface/10 grayscale pointer-events-none'
               }`}
             >
-              {loading ? <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div> : 'Validar'}
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <span className="text-xs uppercase tracking-[0.2em]">OK</span>
+              )}
             </button>
           </div>
+
+          <button 
+            onClick={onClose}
+            className="w-full py-4 text-[10px] font-black text-on-surface/20 hover:text-red-500 transition-all uppercase tracking-[0.3em]"
+          >
+            Cancelar Proceso
+          </button>
         </div>
       </div>
     </div>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta de Inversión - Plataforma Digital</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FFD700;
+            --primary-glow: rgba(255, 215, 0, 0.4);
+            --bg-dark: #0A0F1D;
+            --bg-accent: #161B2E;
+            --text-main: #FFFFFF;
+            --text-dim: #A0AEC0;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --gradient: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg-dark); color: var(--text-main); display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .card { background: var(--bg-accent); border: 1px solid var(--glass-border); border-radius: 24px; padding: 48px; width: 100%; max-width: 500px; backdrop-filter: blur(10px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); }
+        .platform-name { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 800; margin-bottom: 24px; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .price-container { margin: 32px 0; padding: 24px; background: var(--glass); border-radius: 16px; border: 1px solid var(--glass-border); text-align: center; }
+        .currency { font-size: 1.5rem; font-weight: 600; color: var(--primary); }
+        .amount { font-size: 4rem; font-weight: 800; font-family: 'Outfit', sans-serif; }
+        .period { font-size: 1rem; color: var(--text-dim); display: block; margin-top: 8px; }
+        .features { list-style: none; margin: 32px 0; }
+        .features li { display: flex; align-items: center; margin-bottom: 16px; color: var(--text-dim); }
+        .features li::before { content: "✓"; color: var(--primary); margin-right: 12px; font-weight: bold; }
+        .cta-button { display: block; width: 100%; padding: 16px; background: var(--gradient); color: #000; text-align: center; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 1.1rem; box-shadow: 0 10px 15px -3px rgba(255, 215, 0, 0.3); }
+        .loc-badge { display: inline-flex; align-items: center; background: rgba(255, 255, 255, 0.05); padding: 6px 12px; border-radius: 100px; font-size: 0.75rem; color: var(--text-dim); margin-bottom: 24px; }
+    </style>
+</head>
+<body>
+    <main class="card">
+        <div class="loc-badge">Sede Lima, Perú 🇵🇪</div>
+        <div class="platform-name">Plataforma Inventarios</div>
+        <div class="price-container">
+            <span class="currency">S/</span>
+            <span class="amount">2,499</span>
+            <span class="period">Inversión mensual + IGV</span>
+        </div>
+        <ul class="features">
+            <li>Soporte Técnico 24/7 (Lima)</li>
+            <li>Gestión en Tiempo Real</li>
+            <li>Reportes Analíticos</li>
+        </ul>
+        <a href="#" class="cta-button">Enviar al Cliente</a>
+    </main>
+</body>
+</html>

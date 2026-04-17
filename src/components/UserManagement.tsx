@@ -30,9 +30,10 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState<{ nombre: string; rol: UserRole }>({
+  const [editForm, setEditForm] = useState<{ nombre: string; rol: UserRole; pin_seguridad?: string }>({
     nombre: '',
-    rol: 'operario'
+    rol: 'operario',
+    pin_seguridad: ''
   });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -40,7 +41,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
     nombre: '',
     email: '',
     password: '',
-    rol: 'operario' as UserRole
+    rol: 'operario' as UserRole,
+    pin_seguridad: ''
   });
 
   const roles: UserRole[] = ['administrador', 'supervisor', 'operario'];
@@ -82,10 +84,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
 
       // Attempt to upsert the role manually to make sure it's saved correctly
       const { error: dbError } = await supabase.from('perfiles').upsert({
-         id: authData.user.id,
-         email: addForm.email,
-         nombre: addForm.nombre,
-         rol: addForm.rol
+          id: authData.user.id,
+          email: addForm.email,
+          nombre: addForm.nombre,
+          rol: addForm.rol,
+          pin_seguridad: addForm.pin_seguridad || null
       });
 
       if (dbError) {
@@ -97,7 +100,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
          }).eq('id', authData.user.id);
       }
 
-      setAddForm({ nombre: '', email: '', password: '', rol: 'operario' });
+      setAddForm({ nombre: '', email: '', password: '', rol: 'operario', pin_seguridad: '' });
       setIsAddModalOpen(false);
       fetchPerfiles();
 
@@ -127,7 +130,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
     setEditingId(perfil.id);
     setEditForm({
       nombre: perfil.nombre || '',
-      rol: perfil.rol
+      rol: perfil.rol,
+      pin_seguridad: perfil.pin_seguridad || ''
     });
   };
 
@@ -136,7 +140,8 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
       .from('perfiles')
       .update({
         nombre: editForm.nombre,
-        rol: editForm.rol
+        rol: editForm.rol,
+        pin_seguridad: editForm.pin_seguridad || null
       })
       .eq('id', id);
 
@@ -240,6 +245,7 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
                     <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
                       {perfil.nombre || 'Sin nombre'}
                       {perfil.rol === 'administrador' && <Shield size={14} className="text-amber-500" />}
+                      {perfil.pin_seguridad && <Key size={12} className="text-green-500" title="PIN Configurado" />}
                     </h3>
                   )}
                   <p className="text-sm text-gray-400 font-medium">{perfil.email}</p>
@@ -256,6 +262,17 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
                     >
                       {roles.map(r => <option key={r} value={r} className="capitalize">{r}</option>)}
                     </select>
+                    
+                    {(editForm.rol === 'supervisor' || editForm.rol === 'administrador') && (
+                      <input 
+                        type="text" 
+                        maxLength={4}
+                        placeholder="PIN"
+                        className="bg-gray-50 border border-gray-200 rounded-xl px-2 py-2 text-sm font-bold text-gray-700 outline-none focus:border-primary w-16 text-center"
+                        value={editForm.pin_seguridad}
+                        onChange={(e) => setEditForm({...editForm, pin_seguridad: e.target.value.replace(/\D/g, '')})}
+                      />
+                    )}
                     
                     <button 
                       onClick={() => handleUpdate(perfil.id)}
@@ -379,6 +396,22 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
                   {roles.map(r => <option key={r} value={r} className="capitalize">{r}</option>)}
                 </select>
               </div>
+
+              {(addForm.rol === 'supervisor' || addForm.rol === 'administrador') && (
+                <div className="space-y-1.5 animate-in slide-in-from-top-2">
+                  <label className="text-[10px] uppercase font-bold text-amber-600 ml-1 tracking-widest">PIN de Seguridad (4 dígitos)</label>
+                  <input 
+                    type="text" 
+                    required
+                    maxLength={4}
+                    pattern="\d{4}"
+                    className="w-full bg-amber-50 border border-amber-200 rounded-2xl py-3.5 px-4 text-gray-800 outline-none focus:border-amber-500 transition-all text-sm font-bold placeholder:text-amber-200"
+                    placeholder="Ej: 1234"
+                    value={addForm.pin_seguridad}
+                    onChange={(e) => setAddForm({...addForm, pin_seguridad: e.target.value.replace(/\D/g, '')})}
+                  />
+                </div>
+              )}
 
               <button 
                 type="submit" 

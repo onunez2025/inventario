@@ -63,91 +63,140 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-end sm:items-center justify-center p-0 sm:p-4 pb-20 sm:pb-4">
-      <div className="bg-white ...">
-        <div className="p-6 space-y-6">
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-md z-[200] flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="glass w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl animate-in zoom-in-95 duration-500">
+        <div className="p-8 space-y-8">
+          {/* Header */}
           <div className="flex justify-between items-start">
-            <div>
-              <p className="text-xs uppercase tracking-widest text-on-surface/50 font-bold">Verificación de Stock</p>
-              <h2 className="text-2xl font-display">{articulo.nombre}</h2>
-              <p className="text-sm text-primary font-bold">SKU: {articulo.sku}</p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full">Verificación Activa</span>
+                <span className="text-[10px] font-bold text-on-surface/40 uppercase tracking-widest">SKU: {articulo.sku}</span>
+              </div>
+              <h2 className="text-3xl font-display font-black text-on-surface leading-tight">{articulo.nombre}</h2>
             </div>
-            <button onClick={onClose} className="p-2 bg-surface-container-low rounded-full">
+            <button 
+              onClick={onClose} 
+              className="p-3 bg-white/50 border border-black/5 rounded-2xl hover:bg-white transition-all active:scale-90"
+            >
               <X size={20} />
             </button>
           </div>
 
+          {/* Metrics Grid */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-surface-container-low p-4 rounded-2xl">
-              <p className="text-[10px] uppercase opacity-50 font-bold">Stock Sistema</p>
-              <p className="text-xl font-display">{articulo.stock_sistema} uds</p>
+            <div className="bg-white/50 border border-black/5 p-5 rounded-3xl">
+              <p className="text-[10px] uppercase opacity-40 font-black tracking-widest mb-1">Stock Sistema</p>
+              <div className="flex items-baseline gap-1">
+                <p className="text-2xl font-black">{articulo.stock_sistema}</p>
+                <p className="text-xs font-bold opacity-40 uppercase">Unid</p>
+              </div>
             </div>
-            <div className="bg-primary/5 p-4 rounded-2xl border border-primary/10">
-              <p className="text-[10px] uppercase text-primary font-bold">Precio Unit.</p>
-              <p className="text-xl font-display">S/. {articulo.costo_unitario}</p>
+            <div className="bg-primary/5 border border-primary/10 p-5 rounded-3xl">
+              <p className="text-[10px] uppercase text-primary/60 font-black tracking-widest mb-1">Costo Valorizado</p>
+              <div className="flex items-baseline gap-1 py-1">
+                <p className="text-xs font-bold text-primary/60">S/.</p>
+                <p className="text-2xl font-black text-primary">{articulo.costo_unitario.toLocaleString()}</p>
+              </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-bold flex items-center gap-2">
-              <Calculator size={16} /> Cantidad Contada
+          {/* Input Section */}
+          <div className="space-y-3">
+            <label className="text-xs font-black uppercase tracking-[0.2em] text-on-surface/40 px-1">
+               Cantidad Detectada Física
             </label>
-            <input 
-              type="number" 
-              className="input-field text-2xl font-display text-center"
-              placeholder="0"
-              value={conteo}
-              onChange={(e) => setConteo(e.target.value)}
-            />
+            <div className="relative group">
+              <div className="absolute left-6 top-1/2 -translate-y-1/2 text-on-surface/20 group-focus-within:text-primary transition-colors">
+                <Calculator size={24} />
+              </div>
+              <input 
+                type="number" 
+                autoFocus
+                className="w-full bg-white/50 border border-black/5 p-7 pl-16 rounded-[2rem] text-3xl font-black focus:bg-white focus:ring-4 focus:ring-primary/5 focus:border-primary/20 transition-all outline-none"
+                placeholder="0"
+                value={conteo}
+                onChange={(e) => setConteo(e.target.value)}
+              />
+            </div>
           </div>
 
+          {/* Difference & Impact Container */}
           {conteo !== '' && (
-            <div className={`p-4 rounded-2xl flex items-center gap-4 animate-in fade-in duration-500 ${diferencia === 0 ? 'bg-secondary-container/20 text-secondary' : 'bg-red-50 text-red-600'}`}>
-              <AlertCircle size={24} />
-              <div>
-                <p className="text-sm font-bold">Diferencia: {diferencia > 0 ? '+' : ''}{diferencia} unidades</p>
-                <p className="text-xs opacity-70">Impacto económico: S/. {impactoEconomico.toLocaleString()}</p>
+            <div className={`p-6 rounded-[2rem] border animate-in slide-in-from-top-4 duration-500 ${diferencia === 0 ? 'bg-secondary/5 border-secondary/10' : 'bg-red-500/5 border-red-500/10'}`}>
+              <div className="flex items-start gap-4">
+                <div className={`p-3 rounded-2xl ${diferencia === 0 ? 'bg-secondary/20 text-secondary' : 'bg-red-500/20 text-red-500'}`}>
+                  <AlertCircle size={24} />
+                </div>
+                <div className="flex-1">
+                  <div className="flex justify-between items-center">
+                    <p className={`text-sm font-black uppercase tracking-widest ${diferencia === 0 ? 'text-secondary' : 'text-red-500'}`}>
+                      {diferencia === 0 ? 'Stock Conciliado' : `Discrepancia: ${diferencia > 0 ? '+' : ''}${diferencia} Unid.`}
+                    </p>
+                    {diferencia !== 0 && (
+                      <span className="text-xs font-black px-2 py-0.5 bg-red-500/10 text-red-500 rounded-md">Alerta de Merma</span>
+                    )}
+                  </div>
+                  <p className="text-xs opacity-50 mt-1 font-medium italic">
+                    {diferencia === 0 ? 'Los datos coinciden plenamente con el sistema.' : `Impacto proyectado en inventario: S/. ${Math.abs(impactoEconomico).toLocaleString()}`}
+                  </p>
+                </div>
               </div>
             </div>
           )}
 
-          <div className="space-y-4 pt-2">
-            <div className="flex gap-2">
-              <div className="flex-1">
-                <label className="text-xs font-bold uppercase opacity-50 mb-1 block">Observaciones</label>
-                <textarea 
-                  className="input-field min-h-[80px] text-sm"
-                  placeholder="Ej: Producto dañado, error de ubicación..."
-                  value={observacion}
-                  onChange={(e) => setObservacion(e.target.value)}
-                />
-              </div>
-              <div className="w-20">
-                 <label className="text-xs font-bold uppercase opacity-50 mb-1 block">Foto</label>
-                 <label className="w-full aspect-square bg-surface-container-high rounded-xl flex items-center justify-center cursor-pointer hover:bg-surface-container-highest transition-colors">
-                    <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files && setFoto(e.target.files[0])} />
-                    <Camera size={24} className={foto ? 'text-primary' : 'text-on-surface/30'} />
-                 </label>
-              </div>
+          {/* Observations & Photo */}
+          <div className="flex gap-4">
+            <div className="flex-1 space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-widest text-on-surface/30 px-1">Notas de Campo</label>
+              <textarea 
+                className="w-full bg-white/50 border border-black/5 p-4 rounded-3xl min-h-[100px] text-sm focus:bg-white outline-none transition-all placeholder:opacity-30"
+                placeholder="Describa el estado físico, ubicación o anomalías..."
+                value={observacion}
+                onChange={(e) => setObservacion(e.target.value)}
+              />
+            </div>
+            <div className="w-24 space-y-2">
+               <label className="text-[10px] font-black uppercase tracking-widest text-on-surface/30 px-1">Evidencia</label>
+               <label className="relative block w-full aspect-square bg-white/50 border border-black/5 rounded-3xl overflow-hidden cursor-pointer hover:bg-white hover:border-primary/20 transition-all group">
+                  <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files && setFoto(e.target.files[0])} />
+                  {foto ? (
+                    <div className="absolute inset-0 flex items-center justify-center p-2 bg-primary/5 text-primary text-[10px] font-black uppercase text-center">
+                      Imagen Cargada
+                    </div>
+                  ) : (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-on-surface/20 group-hover:text-primary transition-colors">
+                      <Camera size={28} />
+                    </div>
+                  )}
+               </label>
             </div>
           </div>
 
-          <button 
-            disabled={loading || conteo === ''}
-            onClick={handleSave}
-            className="btn-primary w-full flex items-center justify-center gap-2 py-4"
-          >
-            {loading ? 'Guardando...' : (
-              <>
-                <Save size={20} />
-                Confirmar Hallazgo
-              </>
-            )}
-          </button>
-          
-          <div className="flex items-center gap-2 text-[10px] text-on-surface/40 bg-surface-container-low p-2 rounded-lg">
-            <Info size={12} />
-            <p>Asegúrese de revisar los contenedores adyacentes antes de confirmar.</p>
+          {/* Action Footer */}
+          <div className="pt-2 flex flex-col gap-4">
+            <button 
+              disabled={loading || conteo === ''}
+              onClick={handleSave}
+              className="btn-premium w-full flex items-center justify-center gap-3 py-5 text-sm"
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  PROCESANDO...
+                </div>
+              ) : (
+                <>
+                  <Save size={18} />
+                  CONFIRMAR REGISTRO
+                </>
+              )}
+            </button>
+            
+            <div className="flex items-center justify-center gap-2 py-2 opacity-30">
+              <Info size={14} />
+              <p className="text-[9px] font-bold uppercase tracking-widest">Dato asegurado con auditoría biométrica y GPS</p>
+            </div>
           </div>
         </div>
       </div>

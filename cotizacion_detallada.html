@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cotización Detallada - Plataforma de Inventarios v3.0</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #FFD700; --bg-dark: #070A15; --bg-card: #0F1629; --text-main: #FFFFFF; --text-dim: #94A3B8; --border: rgba(255, 255, 255, 0.08); }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: 'Inter', sans-serif; padding: 40px 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 900px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 60px; box-shadow: 0 50px 100px -20px rgba(0,0,0,0.7); }
+        header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 50px; }
+        .logo-section h2 { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 800; background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .quote-info h1 { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 800; }
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 50px; padding: 30px; background: rgba(255, 255, 255, 0.02); border-radius: 12px; }
+        .detail-box h3 { font-size: 0.75rem; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 40px; }
+        th { background: #161E35; color: var(--primary); text-align: left; padding: 15px 20px; font-size: 0.8rem; text-transform: uppercase; border-bottom: 2px solid var(--border); }
+        td { padding: 20px; border-bottom: 1px solid var(--border); vertical-align: top; }
+        .item-desc h4 { font-size: 1rem; margin-bottom: 5px; font-weight: 600; }
+        .item-desc p { font-size: 0.85rem; color: var(--text-dim); }
+        .price-col { font-family: 'Outfit', sans-serif; font-weight: 600; white-space: nowrap; }
+        .summary-section { display: flex; justify-content: flex-end; }
+        .summary-box { width: 300px; }
+        .summary-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+        .summary-row.total span { font-size: 1.8rem; font-weight: 800; color: var(--primary); font-family: 'Outfit', sans-serif; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo-section"><h2>INVENTORY SOLUTIONS</h2><p>Lima, Perú</p></div>
+            <div class="quote-info"><h1>COTIZACIÓN</h1><p style="color: var(--primary);">N° COT-2026-0042</p></div>
+        </header>
+        <div class="details-grid">
+            <div class="detail-box"><h3>Cliente:</h3><p><b>Razón Social del Cliente S.A.C.</b></p></div>
+            <div class="detail-box"><h3>Condiciones:</h3><p>Válido hasta: 01 de Mayo, 2026</p><p>Moneda: Soles (PEN)</p></div>
+        </div>
+        <table>
+            <thead><tr><th>Descripción</th><th>Cant.</th><th style="text-align: right;">Unitario</th><th style="text-align: right;">Total</th></tr></thead>
+            <tbody>
+                <tr><td><div class="item-desc"><h4>Implementación Base</h4><p>Nube, DB y Seguridad.</p></div></td><td>1</td><td class="price-col" style="text-align: right;">S/ 8,500.00</td><td class="price-col" style="text-align: right;">S/ 8,500.00</td></tr>
+                <tr><td><div class="item-desc"><h4>Licencia Plataforma v3.0</h4><p>Acceso ilimitado a todos los módulos.</p></div></td><td>1</td><td class="price-col" style="text-align: right;">S/ 12,000.00</td><td class="price-col" style="text-align: right;">S/ 12,000.00</td></tr>
+                <tr><td><div class="item-desc"><h4>Módulo de Reportes</h4><p>Excel/PDF y KPI Dashboards.</p></div></td><td>1</td><td class="price-col" style="text-align: right;">S/ 4,500.00</td><td class="price-col" style="text-align: right;">S/ 4,500.00</td></tr>
+                <tr><td><div class="item-desc"><h4>Soporte Mensual</h4><p>Mantenimiento y Hosting.</p></div></td><td>1</td><td class="price-col" style="text-align: right;">S/ 1,200.00</td><td class="price-col" style="text-align: right;">S/ 1,200.00</td></tr>
+            </tbody>
+        </table>
+        <div class="summary-section">
+            <div class="summary-box">
+                <div class="summary-row"><span>Subtotal</span><span class="price-col">S/ 26,200.00</span></div>
+                <div class="summary-row"><span>IGV (18%)</span><span class="price-col">S/ 4,716.00</span></div>
+                <div class="summary-row total"><span style="font-weight: 800;">TOTAL</span><span class="price-col">S/ 30,916.00</span></div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

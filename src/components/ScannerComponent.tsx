@@ -12,11 +12,17 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
   const [isScanning, setIsScanning] = useState(false);
   const [isBarrido, setIsBarrido] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [flash, setFlash] = useState<'success' | 'error' | null>(null);
   const [lastScanFeedback, setLastScanFeedback] = useState<string | null>(null);
   
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const lastScannedSkuRef = useRef<string | null>(null);
   const lastScanTimeRef = useRef<number>(0);
+
+  const triggerFlash = (type: 'success' | 'error') => {
+    setFlash(type);
+    setTimeout(() => setFlash(null), 600);
+  };
 
   useEffect(() => {
     const startScanner = async () => {
@@ -27,30 +33,24 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
         await scanner.start(
           { facingMode: "environment" },
           {
-            fps: 10,
-            qrbox: { width: 250, height: 250 },
+            fps: 15,
+            qrbox: { width: 280, height: 280 },
           },
           (decodedText) => {
             handleAutoScan(decodedText);
           },
-          () => {
-            // Failure is normal while searching for a code
-          }
+          () => {}
         );
         setIsScanning(true);
       } catch (err: any) {
         console.error("Error starting scanner:", err);
-        setError("No se pudo acceder a la cámara. Asegúrate de dar permisos.");
+        setError("Acceso denegado a la cámara. Revisa los permisos.");
       }
     };
 
     startScanner();
-
-    return () => {
-      stopScanner();
-    };
-  }, [isBarrido]); // Re-start if mode changes? Actually, we don't need to restart, but the callback closure needs the latest isBarrido.
-  // Better use a ref for isBarrido to avoid effect dependency or wrap handleAutoScan.
+    return () => { stopScanner(); };
+  }, [isBarrido]);
 
   const isBarridoRef = useRef(isBarrido);
   useEffect(() => {
@@ -59,7 +59,6 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
 
   const handleAutoScan = (decodedText: string) => {
     const now = Date.now();
-    // Cooldown de 2 segundos para el mismo SKU en modo barrido
     if (isBarridoRef.current && decodedText === lastScannedSkuRef.current && (now - lastScanTimeRef.current < 2000)) {
       return;
     }
@@ -68,12 +67,15 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
     lastScanTimeRef.current = now;
 
     if (isBarridoRef.current) {
-      // Feedback visual inmediato
+      triggerFlash('success');
       setLastScanFeedback(decodedText);
-      setTimeout(() => setLastScanFeedback(null), 1000);
+      setTimeout(() => setLastScanFeedback(null), 1500);
       onScan(decodedText, 'barrido');
     } else {
-      stopScanner().then(() => onScan(decodedText, 'standard'));
+      triggerFlash('success');
+      setTimeout(() => {
+        stopScanner().then(() => onScan(decodedText, 'standard'));
+      }, 300);
     }
   };
 
@@ -92,6 +94,7 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
     e.preventDefault();
     if (manualSku.trim()) {
       const mode = isBarrido ? 'barrido' : 'standard';
+      triggerFlash('success');
       if (mode === 'standard') {
         stopScanner().then(() => onScan(manualSku.trim(), 'standard'));
       } else {
@@ -104,118 +107,130 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
   };
 
   return (
-    <div className="fixed inset-0 bg-black/95 z-[200] flex flex-col items-center justify-center p-6 text-white text-center animate-in fade-in duration-300">
+    <div className="fixed inset-0 bg-black/95 z-[200] flex flex-col items-center justify-center p-6 text-white text-center animate-in fade-in duration-500 overflow-hidden">
       
+      {/* Dynamic Background Decoration */}
+      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/20 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-secondary/20 blur-[120px] rounded-full pointer-events-none" />
+
       {/* Mode Selector */}
-      <div className="absolute top-8 left-0 right-0 flex justify-center px-6 z-10">
-        <div className="bg-white/10 backdrop-blur-md p-1.5 rounded-2xl flex gap-1 border border-white/10 w-full max-w-xs shadow-2xl">
+      <div className="absolute top-10 left-0 right-0 flex justify-center px-6 z-20">
+        <div className="bg-white/5 backdrop-blur-2xl p-1.5 rounded-3xl flex gap-2 border border-white/10 w-full max-w-xs shadow-2xl">
           <button 
             onClick={() => setIsBarrido(false)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${!isBarrido ? 'bg-white text-primary shadow-lg scale-105' : 'text-white/40 hover:text-white/60'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${!isBarrido ? 'bg-white text-primary shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105' : 'text-white/40 hover:text-white/60'}`}
           >
-            <Calculator size={14} />
+            <Calculator size={16} />
             Manual
           </button>
           <button 
             onClick={() => setIsBarrido(true)}
-            className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${isBarrido ? 'bg-secondary text-white shadow-lg shadow-secondary/20 scale-105' : 'text-white/40 hover:text-white/60'}`}
+            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all duration-300 ${isBarrido ? 'bg-secondary text-white shadow-[0_0_20px_rgba(0,107,95,0.4)] scale-105' : 'text-white/40 hover:text-white/60'}`}
           >
-            <Zap size={14} />
+            <Zap size={16} />
             Barrido
           </button>
         </div>
       </div>
 
-      {/* Scanner Wrapper */}
-      <div className={`relative w-full max-w-sm aspect-square rounded-[40px] border-2 overflow-hidden shadow-2xl transition-all duration-500 ${isBarrido ? 'border-secondary/50 shadow-secondary/10' : 'border-white/20 shadow-primary/10'}`}>
-        <div id="reader" className="w-full h-full flex items-center justify-center bg-black overflow-hidden [&_video]:object-contain" />
+      {/* Scanner Container */}
+      <div className={`relative w-full max-w-md aspect-square rounded-[3rem] border-2 overflow-hidden shadow-2xl transition-all duration-700 ${isBarrido ? 'border-secondary/40 shadow-secondary/5' : 'border-white/10 shadow-primary/5'}`}>
+        <div id="reader" className="w-full h-full flex items-center justify-center bg-black overflow-hidden [&_video]:object-cover" />
         
-        {/* Flash Feedback */}
+        {/* Flash Overlays */}
+        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${flash === 'success' ? 'animate-flash-success opacity-100' : 'opacity-0'}`} />
+        <div className={`absolute inset-0 pointer-events-none transition-opacity duration-300 ${flash === 'error' ? 'animate-flash-error opacity-100' : 'opacity-0'}`} />
+
+        {/* Scan Feedback UI */}
         {lastScanFeedback && (
-          <div className="absolute inset-0 bg-secondary/20 backdrop-blur-[2px] flex flex-col items-center justify-center animate-out fade-out duration-1000 pointer-events-none">
-            <div className="bg-secondary text-white p-4 rounded-3xl shadow-2xl scale-125 animate-in zoom-in duration-300">
-               <Zap size={32} className="fill-current" />
+          <div className="absolute inset-0 glass-dark flex flex-col items-center justify-center animate-in zoom-in duration-300 pointer-events-none">
+            <div className="bg-secondary/20 p-6 rounded-[2.5rem] border border-secondary/30 mb-4">
+               <Zap size={48} className="text-secondary fill-secondary/20" />
             </div>
-            <p className="mt-4 font-black text-xl tracking-widest text-secondary text-shadow-lg">¡REGISTRADO!</p>
-            <p className="text-sm font-bold opacity-70">{lastScanFeedback}</p>
+            <p className="font-black text-2xl tracking-[0.2em] text-white uppercase text-shadow">¡REGISTRADO!</p>
+            <p className="text-sm font-bold opacity-60 mt-1 uppercase tracking-widest">{lastScanFeedback}</p>
           </div>
         )}
 
         {!isScanning && !error && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/50 backdrop-blur-sm">
-            <Loader2 className="animate-spin text-primary" size={40} />
-            <p className="text-sm font-medium opacity-70">Iniciando cámara...</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80 backdrop-blur-md">
+            <Loader2 className="animate-spin text-primary" size={48} />
+            <p className="text-xs font-black uppercase tracking-[0.3em] opacity-40">Activando Visión</p>
           </div>
         )}
 
         {error && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-red-950/20 p-8">
-               <Camera size={48} className="text-red-500 opacity-50" />
-               <p className="text-sm font-bold text-red-500 leading-tight">{error}</p>
-               <button onClick={onCancel} className="mt-4 px-6 py-2 bg-white/10 rounded-full text-xs font-bold uppercase tracking-widest">Cerrar</button>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-red-950/40 backdrop-blur-xl p-10">
+               <div className="bg-red-500/10 p-5 rounded-full border border-red-500/20">
+                <Camera size={48} className="text-red-500" />
+               </div>
+               <p className="text-sm font-black text-red-500 uppercase tracking-widest leading-relaxed">{error}</p>
+               <button onClick={onCancel} className="btn-premium bg-red-500">Volver</button>
             </div>
         )}
 
-        {/* Overlay Decoration */}
+        {/* Scanner Ornaments */}
         {isScanning && (
           <>
-            <div className={`absolute top-1/2 left-4 right-4 h-0.5 shadow-[0_0_15px] animate-pulse ${isBarrido ? 'bg-secondary shadow-secondary' : 'bg-red-500 shadow-red-500'}`} />
-            <div className="absolute inset-0 border-[40px] border-black/20 pointer-events-none" />
-            {/* Corner Brackets */}
-            <div className={`absolute top-10 left-10 w-8 h-8 border-t-4 border-l-4 rounded-tl-lg transition-colors ${isBarrido ? 'border-secondary' : 'border-white/30'}`} />
-            <div className={`absolute top-10 right-10 w-8 h-8 border-t-4 border-r-4 rounded-tr-lg transition-colors ${isBarrido ? 'border-secondary' : 'border-white/30'}`} />
-            <div className={`absolute bottom-10 left-10 w-8 h-8 border-b-4 border-l-4 rounded-bl-lg transition-colors ${isBarrido ? 'border-secondary' : 'border-white/30'}`} />
-            <div className={`absolute bottom-10 right-10 w-8 h-8 border-b-4 border-r-4 rounded-br-lg transition-colors ${isBarrido ? 'border-secondary' : 'border-white/30'}`} />
+            <div className="absolute top-0 bottom-0 left-0 right-0 pointer-events-none">
+              <div className={`absolute left-0 right-0 h-[2px] shadow-[0_0_20px] animate-scanner-laser ${isBarrido ? 'bg-secondary shadow-secondary' : 'bg-primary shadow-primary'}`} />
+            </div>
+            
+            {/* Corner Markers */}
+            <div className="absolute inset-x-8 inset-y-8 flex flex-col justify-between pointer-events-none opacity-40">
+              <div className="flex justify-between">
+                <div className={`w-10 h-10 border-t-4 border-l-4 rounded-tl-3xl ${isBarrido ? 'border-secondary' : 'border-white'}`} />
+                <div className={`w-10 h-10 border-t-4 border-r-4 rounded-tr-3xl ${isBarrido ? 'border-secondary' : 'border-white'}`} />
+              </div>
+              <div className="flex justify-between">
+                <div className={`w-10 h-10 border-b-4 border-l-4 rounded-bl-3xl ${isBarrido ? 'border-secondary' : 'border-white'}`} />
+                <div className={`w-10 h-10 border-b-4 border-r-4 rounded-br-3xl ${isBarrido ? 'border-secondary' : 'border-white'}`} />
+              </div>
+            </div>
           </>
         )}
       </div>
 
-      <div className="mt-6 flex flex-col items-center gap-1">
-        <p className={`text-xs font-display tracking-[0.2em] uppercase font-black transition-colors ${isBarrido ? 'text-secondary opacity-100' : 'opacity-50'}`}>
-          {isBarrido ? 'Modo Barrido Activo' : 'Escaneando...'}
-        </p>
-        {isBarrido && <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">Registrando 1x1 automáticamente</p>}
-      </div>
-
       {/* Manual Input Section */}
-      <div className="mt-8 w-full max-w-xs space-y-6 animate-in slide-in-from-bottom-5 duration-500">
+      <div className="mt-10 w-full max-w-xs space-y-8 animate-in slide-in-from-bottom-10 duration-700">
         <form onSubmit={handleManualSubmit} className="space-y-4">
-          <p className="text-xs font-bold uppercase tracking-widest text-white/40">O ingresa manualmente</p>
-          <div className="relative">
+          <div className="relative group">
             <input 
               type="text" 
-              placeholder="CÓDIGO SKU"
-              className="w-full bg-white/10 border border-white/20 p-5 rounded-2xl text-center text-xl font-black tracking-[0.3em] focus:bg-white/20 focus:border-primary outline-none transition-all placeholder:opacity-20 uppercase"
+              placeholder="SKU"
+              className="w-full bg-white/5 border border-white/10 p-6 rounded-[2rem] text-center text-2xl font-black tracking-[0.4em] focus:bg-white/10 focus:border-white/30 outline-none transition-all placeholder:text-white/10 uppercase"
               value={manualSku}
               onChange={(e) => setManualSku(e.target.value.toUpperCase())}
             />
             {manualSku && (
               <button 
                 type="submit"
-                className={`absolute right-3 top-3 bottom-3 px-5 rounded-xl flex items-center justify-center shadow-lg active:scale-95 transition-all ${isBarrido ? 'bg-secondary shadow-secondary/20' : 'bg-primary shadow-primary/20'}`}
+                className={`absolute right-3 top-3 bottom-3 px-6 rounded-2xl flex items-center justify-center shadow-xl active:scale-90 transition-all ${isBarrido ? 'bg-secondary' : 'bg-primary'}`}
               >
-                {isBarrido ? <Zap size={24} /> : <ArrowRight size={24} />}
+                {isBarrido ? <Zap size={28} /> : <ArrowRight size={28} />}
               </button>
             )}
           </div>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] opacity-30">
+            {isBarrido ? 'Modo Barrido Activo (Registro 1x1)' : 'Apunta al código para escanear'}
+          </p>
         </form>
 
         <button 
           onClick={() => stopScanner().then(onCancel)}
-          className="group flex flex-col items-center gap-2 mx-auto"
+          className="group flex flex-col items-center gap-3 mx-auto transition-all hover:scale-110"
         >
-          <div className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
-             <span className="text-lg font-bold">×</span>
+          <div className="px-8 py-3 rounded-full border border-white/10 bg-white/5 hover:bg-red-500/10 hover:border-red-500/30 transition-all flex items-center gap-3">
+             <span className="text-xs font-black uppercase tracking-widest text-white/60">Finalizar Sesión</span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-40 group-hover:opacity-100">Cerrar Escáner</span>
         </button>
       </div>
 
-      {/* Footer Decoration */}
-      <div className="absolute bottom-12 flex gap-10 opacity-20 pointer-events-none">
-         <Calculator size={20} />
-         <Layout size={20} />
-         <Search size={20} />
+      {/* Decorative Brand Dots */}
+      <div className="absolute bottom-10 flex gap-3 opacity-20">
+         <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+         <div className="w-1.5 h-1.5 rounded-full bg-secondary" />
+         <div className="w-1.5 h-1.5 rounded-full bg-white" />
       </div>
     </div>
   );
