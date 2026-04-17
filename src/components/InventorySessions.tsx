@@ -162,7 +162,7 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
 
         <button 
           onClick={() => setIsCreating(true)}
-          className="btn-primary flex items-center justify-center gap-2 px-6 py-4 shadow-xl shadow-primary/20"
+          className="btn-premium flex items-center justify-center gap-2 px-6 py-4"
         >
           <Plus size={20} />
           Programar Nuevo
@@ -267,8 +267,8 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
                         Seleccionar
                       </button>
                     ) : (
-                      <div className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20">
-                        <CheckCircle2 size={16} />
+                        <div className="flex items-center gap-2 px-6 py-3 btn-premium rounded-2xl font-bold text-sm shadow-xl shadow-primary/30">
+                        <CheckCircle2 size={18} />
                         Activo
                       </div>
                     )}

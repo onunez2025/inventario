@@ -130,7 +130,7 @@ export const LoginPage: React.FC = () => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="btn-primary w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 mt-8 shadow-2xl shadow-primary/30 hover:shadow-primary/40 text-lg font-black tracking-tight"
+                className="btn-premium w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 mt-8 text-lg font-black tracking-tight"
               >
                 {loading ? <Loader2 className="animate-spin" size={24} /> : <LogIn size={24} />}
                 {loading ? 'Iniciando Sesión...' : 'Entrar al Sistema'}
@@ -156,7 +156,7 @@ export const LoginPage: React.FC = () => {
               <button 
                 type="submit" 
                 disabled={loading}
-                className="btn-primary w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 mt-8 shadow-2xl shadow-primary/30 text-lg font-black tracking-tight"
+                className="btn-premium w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 mt-8 text-lg font-black tracking-tight"
               >
                 {loading ? <Loader2 className="animate-spin" size={24} /> : <Key size={24} />}
                 {loading ? 'Enviando...' : 'Recuperar Contraseña'}
