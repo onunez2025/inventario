@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
-import type { Articulo, Perfil, Inventario, PermissionKey } from './types';
+import type { Articulo, Perfil, Inventario, PermissionKey, Zona } from './types';
 import { rbacService } from './services/rbacService';
 
 // Components

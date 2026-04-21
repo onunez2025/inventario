@@ -15,14 +15,12 @@ interface ZoneSelectorProps {
   inventoryId: string;
   selectedZone: Zona | null;
   onSelectZone: (zona: Zona | null) => void;
-  currentUserEmail: string | null;
 }
 
 export const ZoneSelector: React.FC<ZoneSelectorProps> = ({ 
   inventoryId, 
   selectedZone, 
-  onSelectZone,
-  currentUserEmail
+  onSelectZone
 }) => {
   const [zonas, setZonas] = useState<Zona[]>([]);
   const [loading, setLoading] = useState(true);

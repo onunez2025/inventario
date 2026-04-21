@@ -66,7 +66,6 @@ const StatusPage: React.FC<StatusPageProps> = ({
             inventoryId={activeInventory.id}
             selectedZone={activeZone}
             onSelectZone={onSelectZone}
-            currentUserEmail={perfil?.email || null}
           />
         )}
       </div>
