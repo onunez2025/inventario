@@ -11,6 +11,7 @@ import { LoginPage } from './components/LoginPage';
 import SupervisorAuthModal from './components/SupervisorAuthModal';
 import { ItemModal } from './components/ItemModal';
 import { ProfileModal } from './components/ProfileModal';
+import { ZoneSelector } from './components/ZoneSelector';
 
 // Pages & Layout
 import MainLayout from './layouts/MainLayout';
@@ -32,6 +33,12 @@ const App: React.FC = () => {
     const saved = localStorage.getItem('activeInventory');
     return saved ? JSON.parse(saved) : null;
   });
+
+  const [activeZone, setActiveZone] = useState<Zona | null>(() => {
+    const saved = localStorage.getItem('activeZone');
+    return saved ? JSON.parse(saved) : null;
+  });
+
 
   const { data, recentCounts, refresh: refreshData } = useInventory(activeInventory);
 
@@ -98,7 +105,20 @@ const App: React.FC = () => {
   const handleSelectInventory = (inv: Inventario) => {
     setActiveInventory(inv);
     localStorage.setItem('activeInventory', JSON.stringify(inv));
+    // Reset zone when changing inventory
+    setActiveZone(null);
+    localStorage.removeItem('activeZone');
   };
+
+  const handleSelectZone = (zona: Zona | null) => {
+    setActiveZone(zona);
+    if (zona) {
+      localStorage.setItem('activeZone', JSON.stringify(zona));
+    } else {
+      localStorage.removeItem('activeZone');
+    }
+  };
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -118,10 +138,12 @@ const App: React.FC = () => {
           articulo_id: articulos.id,
           cantidad_fisica: 1,
           inventario_id: activeInventory.id,
+          zona_id: activeZone?.id || null,
           usuario_id: session?.user.id,
           observacion: 'Registro por barrido (1x1)'
         });
         if (!insertError) refreshData();
+
       } else {
         setSelectedArticulo(articulos);
         setShowScanner(false);
@@ -160,6 +182,8 @@ const App: React.FC = () => {
           <Route path="/" element={
             <StatusPage 
               activeInventory={activeInventory}
+              activeZone={activeZone}
+              onSelectZone={handleSelectZone}
               data={data}
               recentCounts={recentCounts}
               perfil={perfil}
@@ -170,6 +194,7 @@ const App: React.FC = () => {
               setShowScanner={setShowScanner}
               fetchData={refreshData}
             />
+
           } />
           
           {hasPermission('view_master') && (
@@ -205,9 +230,11 @@ const App: React.FC = () => {
         <VerificationModal 
           articulo={selectedArticulo} 
           inventarioId={activeInventory?.id || ''}
+          zonaId={activeZone?.id}
           usuarioId={session?.user.id || ''}
           onClose={() => setSelectedArticulo(null)}
           onSave={() => {
+
             setSelectedArticulo(null);
             refreshData();
           }}

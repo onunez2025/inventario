@@ -49,8 +49,10 @@ export const useInventory = (activeInventory: Inventario | null) => {
           cantidad_fisica,
           created_at,
           observacion,
-          articulos(sku, nombre)
+          articulos(sku, nombre),
+          zonas(nombre)
         `)
+
         .eq('inventario_id', activeInventory.id)
         .order('created_at', { ascending: false })
         .limit(30);

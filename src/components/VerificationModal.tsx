@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase';
 interface VerificationModalProps {
   articulo: Articulo;
   inventarioId: string;
+  zonaId?: string;
   usuarioId: string;
   onClose: () => void;
   onSave: () => void;
@@ -14,6 +15,7 @@ interface VerificationModalProps {
 export const VerificationModal: React.FC<VerificationModalProps> = ({ 
   articulo, 
   inventarioId,
+  zonaId,
   usuarioId,
   onClose, 
   onSave 
@@ -51,6 +53,7 @@ export const VerificationModal: React.FC<VerificationModalProps> = ({
       observacion,
       foto_url: fotoUrl,
       inventario_id: inventarioId,
+      zona_id: zonaId || null,
       usuario_id: usuarioId
     });
 

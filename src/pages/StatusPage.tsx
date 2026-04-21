@@ -5,12 +5,17 @@ import { InventorySelector } from '../components/InventorySelector';
 import DashboardIndicators from '../components/DashboardIndicators';
 import { SystemStockTable } from '../components/SystemStockTable';
 import { PhysicalCountsTable } from '../components/PhysicalCountsTable';
+import { ZoneSelector } from '../components/ZoneSelector';
 import { excelService } from '../services/excelService';
-import type { Inventario, ConciliacionRecord, Perfil, PermissionKey } from '../types';
+import type { Inventario, ConciliacionRecord, Perfil, PermissionKey, Zona } from '../types';
+
 
 interface StatusPageProps {
   activeInventory: Inventario | null;
+  activeZone: Zona | null;
+  onSelectZone: (zona: Zona | null) => void;
   data: ConciliacionRecord[];
+
   recentCounts: any[];
   perfil: Perfil | null;
   permisos: PermissionKey[];
@@ -23,7 +28,10 @@ interface StatusPageProps {
 
 const StatusPage: React.FC<StatusPageProps> = ({
   activeInventory,
+  activeZone,
+  onSelectZone,
   data,
+
   recentCounts,
   perfil,
   permisos,
@@ -47,10 +55,22 @@ const StatusPage: React.FC<StatusPageProps> = ({
 
   return (
     <main className="p-3 sm:p-4 max-w-4xl mx-auto space-y-4 sm:space-y-6 pb-32 flex-1">
-      <InventoryHeader 
-        activeInventory={activeInventory} 
-        onChangeInventory={onChangeInventory} 
-      />
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+        <InventoryHeader 
+          activeInventory={activeInventory} 
+          onChangeInventory={onChangeInventory} 
+        />
+        
+        {activeInventory && (
+          <ZoneSelector 
+            inventoryId={activeInventory.id}
+            selectedZone={activeZone}
+            onSelectZone={onSelectZone}
+            currentUserEmail={perfil?.email || null}
+          />
+        )}
+      </div>
+
 
       <section className="bg-primary p-6 rounded-[2rem] text-white shadow-xl shadow-primary/20 relative overflow-hidden">
         <div className="absolute top-0 right-0 -m-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
@@ -155,10 +175,17 @@ const StatusPage: React.FC<StatusPageProps> = ({
                           <p className="text-sm font-bold text-gray-800 line-clamp-1">{count.articulos?.nombre}</p>
                           <div className="flex items-center gap-2">
                             <p className="text-[10px] text-gray-400 font-mono uppercase tracking-tighter">{count.articulos?.sku}</p>
+                            {count.zonas && (
+                              <>
+                                <span className="text-[8px] text-gray-300 font-bold">•</span>
+                                <p className="text-[9px] text-primary font-black uppercase tracking-widest">{count.zonas.nombre}</p>
+                              </>
+                            )}
                             <span className="text-[8px] text-gray-300 font-bold">•</span>
                             <p className="text-[9px] text-gray-400 font-bold">{new Date(count.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
                           </div>
                         </div>
+
                       </div>
                       <div className="text-right">
                         <div className="flex items-center justify-end gap-1">

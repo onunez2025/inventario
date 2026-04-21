@@ -12,9 +12,12 @@ import {
   Loader2,
   ChevronRight,
   Power,
-  Trash2
+  Trash2,
+  Layers
 } from 'lucide-react';
 import type { Inventario } from '../types';
+import { ZoneManagementModal } from './ZoneManagementModal';
+
 
 interface InventorySessionsProps {
   activeInventoryId: string | null;
@@ -33,6 +36,8 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [showConfirm, setShowConfirm] = useState<Inventario | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<Inventario | null>(null);
+  const [managingZones, setManagingZones] = useState<Inventario | null>(null);
+
 
   useEffect(() => {
     fetchInventarios();
@@ -274,7 +279,16 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
                     )}
                     
                     <button 
+                      onClick={() => setManagingZones(inv)}
+                      className="p-2.5 text-gray-400 hover:text-primary hover:bg-primary/5 rounded-xl transition-all"
+                      title="Gestionar Zonas"
+                    >
+                      <Layers size={20} />
+                    </button>
+
+                    <button 
                       onClick={() => setShowConfirm(inv)}
+
                       disabled={actionLoading === inv.id}
                       className="p-2.5 text-gray-400 hover:text-orange-500 hover:bg-orange-50 rounded-xl transition-all"
                       title="Cerrar Inventario"
@@ -407,6 +421,15 @@ export const InventorySessions: React.FC<InventorySessionsProps> = ({
           </div>
         </div>
       )}
+
+      {managingZones && (
+        <ZoneManagementModal 
+          inventoryId={managingZones.id}
+          inventoryName={managingZones.tienda_nombre}
+          onClose={() => setManagingZones(null)}
+        />
+      )}
     </div>
+
   );
 };

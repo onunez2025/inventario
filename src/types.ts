@@ -18,9 +18,19 @@ export interface Inventario {
   fecha_fin?: string;
 }
 
+export interface Zona {
+  id: string;
+  inventario_id: string;
+  nombre: string;
+  usuario_asignado_id?: string;
+  estado: 'pendiente' | 'en_proceso' | 'completado';
+  created_at: string;
+}
+
 export interface Conteo {
   id: string;
   inventario_id: string;
+  zona_id?: string;
   articulo_id: string;
   cantidad_fisica: number;
   usuario_id: string;
@@ -28,6 +38,7 @@ export interface Conteo {
   foto_url?: string;
   created_at: string;
 }
+
 
 export type UserRole = 'supervisor' | 'operario' | 'administrador';
 
