@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { ConciliacionRecord, Inventario } from '../types';
 
@@ -7,6 +7,11 @@ export const useInventory = (activeInventory: Inventario | null) => {
   const [recentCounts, setRecentCounts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // ── Debounce & Queue for rapid scanning ──
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isRefreshingRef = useRef(false);
+  const pendingRefreshRef = useRef(false);
+
   const fetchData = useCallback(async () => {
     if (!activeInventory) {
       setData([]);
@@ -14,6 +19,13 @@ export const useInventory = (activeInventory: Inventario | null) => {
       return;
     }
 
+    // Prevent concurrent refreshes — mark pending instead
+    if (isRefreshingRef.current) {
+      pendingRefreshRef.current = true;
+      return;
+    }
+
+    isRefreshingRef.current = true;
     setLoading(true);
     let allRecords: ConciliacionRecord[] = [];
     let from = 0;
@@ -52,7 +64,6 @@ export const useInventory = (activeInventory: Inventario | null) => {
           articulos(sku, nombre),
           zonas(nombre)
         `)
-
         .eq('inventario_id', activeInventory.id)
         .order('created_at', { ascending: false })
         .limit(30);
@@ -64,12 +75,43 @@ export const useInventory = (activeInventory: Inventario | null) => {
       console.error('Error fetching inventory data:', err);
     } finally {
       setLoading(false);
+      isRefreshingRef.current = false;
+
+      // If a refresh was requested while we were busy, do one more
+      if (pendingRefreshRef.current) {
+        pendingRefreshRef.current = false;
+        fetchData();
+      }
     }
   }, [activeInventory?.id]);
+
+  /**
+   * Debounced refresh — ideal for rapid scanning.
+   * Waits for a pause in scanning activity before hitting the DB.
+   * Default delay: 3 seconds (tuned for PDA barcode guns).
+   */
+  const debouncedRefresh = useCallback((delayMs = 3000) => {
+    if (refreshTimerRef.current) {
+      clearTimeout(refreshTimerRef.current);
+    }
+    refreshTimerRef.current = setTimeout(() => {
+      refreshTimerRef.current = null;
+      fetchData();
+    }, delayMs);
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  return { data, recentCounts, loading, refresh: fetchData };
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (refreshTimerRef.current) {
+        clearTimeout(refreshTimerRef.current);
+      }
+    };
+  }, []);
+
+  return { data, recentCounts, loading, refresh: fetchData, debouncedRefresh };
 };

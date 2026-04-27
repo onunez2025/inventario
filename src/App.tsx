@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { supabase } from './lib/supabase';
 import type { Articulo, Perfil, Inventario, PermissionKey, Zona } from './types';
@@ -40,7 +40,51 @@ const App: React.FC = () => {
   });
 
 
-  const { data, recentCounts, refresh: refreshData } = useInventory(activeInventory);
+  const { data, recentCounts, refresh: refreshData, debouncedRefresh } = useInventory(activeInventory);
+
+  // ── Barrido scan queue: fire-and-forget inserts ──
+  const barridoQueueRef = useRef<Array<{ articulo_id: string; sku: string; nombre: string }>>([]);
+  const barridoProcessingRef = useRef(false);
+  const [barridoCount, setBarridoCount] = useState(0);
+  const [barridoPending, setBarridoPending] = useState(0);
+
+  const processBarridoQueue = useCallback(async () => {
+    if (barridoProcessingRef.current) return;
+    barridoProcessingRef.current = true;
+
+    while (barridoQueueRef.current.length > 0) {
+      const item = barridoQueueRef.current.shift()!;
+      setBarridoPending(barridoQueueRef.current.length);
+
+      try {
+        const { error: insertError } = await supabase.from('conteos').insert({
+          articulo_id: item.articulo_id,
+          cantidad_fisica: 1,
+          inventario_id: activeInventory?.id,
+          zona_id: activeZone?.id || null,
+          usuario_id: session?.user.id,
+          observacion: 'Registro por barrido (1x1)'
+        });
+
+        if (!insertError) {
+          setBarridoCount(prev => prev + 1);
+        } else {
+          // Re-queue on transient error
+          console.warn('Barrido insert error, re-queuing:', insertError.message);
+          barridoQueueRef.current.unshift(item);
+          // Small backoff to avoid hammering on persistent errors
+          await new Promise(r => setTimeout(r, 500));
+        }
+      } catch (err) {
+        console.error('Barrido insert exception:', err);
+        barridoQueueRef.current.unshift(item);
+        await new Promise(r => setTimeout(r, 1000));
+      }
+    }
+
+    setBarridoPending(0);
+    barridoProcessingRef.current = false;
+  }, [activeInventory?.id, activeZone?.id, session?.user?.id]);
 
   const [showScanner, setShowScanner] = useState(false);
   const [selectedArticulo, setSelectedArticulo] = useState<Articulo | null>(null);
@@ -134,15 +178,22 @@ const App: React.FC = () => {
     if (articulos && !error) {
       if (mode === 'barrido') {
         if (!activeInventory) return;
-        const { error: insertError } = await supabase.from('conteos').insert({
+
+        // ── OPTIMIZED: Enqueue instead of blocking ──
+        // The insert goes to a background queue so the scanner
+        // never freezes waiting for the DB response.
+        barridoQueueRef.current.push({
           articulo_id: articulos.id,
-          cantidad_fisica: 1,
-          inventario_id: activeInventory.id,
-          zona_id: activeZone?.id || null,
-          usuario_id: session?.user.id,
-          observacion: 'Registro por barrido (1x1)'
+          sku: articulos.sku,
+          nombre: articulos.nombre
         });
-        if (!insertError) refreshData();
+        setBarridoPending(barridoQueueRef.current.length);
+
+        // Process queue in background (non-blocking)
+        processBarridoQueue();
+
+        // Debounced refresh: only hits the DB once scanning pauses for 3s
+        debouncedRefresh(3000);
 
       } else {
         setSelectedArticulo(articulos);
@@ -222,7 +273,12 @@ const App: React.FC = () => {
       {showScanner && (
         <ScannerComponent 
           onScan={handleScan} 
-          onCancel={() => setShowScanner(false)} 
+          onCancel={() => {
+            setShowScanner(false);
+            setBarridoCount(0); // Reset for next session
+          }}
+          barridoCount={barridoCount}
+          barridoPending={barridoPending}
         />
       )}
 

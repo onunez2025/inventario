@@ -5,9 +5,16 @@ import { Html5Qrcode } from 'html5-qrcode';
 interface ScannerProps {
   onScan: (sku: string, mode: 'standard' | 'barrido') => void;
   onCancel: () => void;
+  barridoCount?: number;
+  barridoPending?: number;
 }
 
-export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) => {
+export const ScannerComponent: React.FC<ScannerProps> = ({ 
+  onScan, 
+  onCancel, 
+  barridoCount = 0, 
+  barridoPending = 0 
+}) => {
   const [manualSku, setManualSku] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [isBarrido, setIsBarrido] = useState(false);
@@ -143,12 +150,32 @@ export const ScannerComponent: React.FC<ScannerProps> = ({ onScan, onCancel }) =
 
         {/* Scan Feedback UI */}
         {lastScanFeedback && (
-          <div className="absolute inset-0 glass-dark flex flex-col items-center justify-center animate-in zoom-in duration-300 pointer-events-none">
+          <div className="absolute inset-0 glass-dark flex flex-col items-center justify-center animate-in zoom-in duration-300 pointer-events-none z-30">
             <div className="bg-secondary/20 p-6 rounded-[2.5rem] border border-secondary/30 mb-4">
                <Zap size={48} className="text-secondary fill-secondary/20" />
             </div>
-            <p className="font-black text-2xl tracking-[0.2em] text-white uppercase text-shadow">¡REGISTRADO!</p>
+            <p className="font-black text-2xl tracking-[0.2em] text-white uppercase text-shadow">¡ESCANEADO!</p>
             <p className="text-sm font-bold opacity-60 mt-1 uppercase tracking-widest">{lastScanFeedback}</p>
+          </div>
+        )}
+
+        {/* Barrido Counters Overlay */}
+        {isBarrido && (
+          <div className="absolute top-6 left-6 right-6 flex justify-between items-start pointer-events-none z-20">
+            <div className="bg-black/40 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/10">
+              <p className="text-[8px] font-black uppercase tracking-widest opacity-50 mb-0.5">Sincronizados</p>
+              <p className="text-xl font-black text-secondary">{barridoCount}</p>
+            </div>
+            
+            {barridoPending > 0 && (
+              <div className="bg-orange-500/20 backdrop-blur-md px-4 py-2 rounded-2xl border border-orange-500/30 flex items-center gap-2 animate-pulse">
+                <Loader2 size={12} className="animate-spin text-orange-500" />
+                <div className="text-left">
+                  <p className="text-[8px] font-black uppercase tracking-widest text-orange-500 mb-0.5">Pendientes</p>
+                  <p className="text-sm font-black text-orange-500">{barridoPending}</p>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
