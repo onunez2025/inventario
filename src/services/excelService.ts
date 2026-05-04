@@ -1,5 +1,6 @@
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import { supabase } from '../lib/supabase';
 import type { ConciliacionRecord } from '../types';
 
 export const excelService = {
@@ -197,10 +198,44 @@ export const excelService = {
         vCell.font = { color: { argb: value < 0 ? 'FFEF4444' : 'FF065F46' } };
       });
     const wsDetail = workbook.addWorksheet('Detalle de Diferencias');
+
+    // Fetch counts to associate zones/locations to each SKU
+    let countsBySku: Record<string, string[]> = {};
+    if (data.length > 0 && data[0].inventario_id) {
+      try {
+        const { data: conteosData } = await supabase
+          .from('conteos')
+          .select(`
+            articulo_id,
+            articulos(sku),
+            zonas(nombre)
+          `)
+          .eq('inventario_id', data[0].inventario_id);
+        
+        if (conteosData && conteosData.length > 0) {
+          conteosData.forEach((c: any) => {
+            const sku = c.articulos?.sku;
+            const zoneName = c.zonas?.nombre;
+            if (sku && zoneName) {
+              if (!countsBySku[sku]) {
+                countsBySku[sku] = [];
+              }
+              if (!countsBySku[sku].includes(zoneName)) {
+                countsBySku[sku].push(zoneName);
+              }
+            }
+          });
+        }
+      } catch (e) {
+        console.error('Error loading count locations:', e);
+      }
+    }
+
     wsDetail.columns = [
       { header: 'Estatus', key: 'status', width: 12 },
       { header: 'SKU', key: 'sku', width: 18 },
       { header: 'Nombre del Artículo', key: 'nombre', width: 45 },
+      { header: 'Ubicación', key: 'ubicacion', width: 22 },
       { header: 'Marca', key: 'marca', width: 15 },
       { header: 'Tipo', key: 'tipo', width: 15 },
       { header: 'Categoría', key: 'categoria', width: 20 },
@@ -229,6 +264,7 @@ export const excelService = {
         status,
         sku: r.sku,
         nombre: r.articulo_nombre.toUpperCase(),
+        ubicacion: (countsBySku[r.sku] || []).join(', ') || 'S/N',
         marca: (r.marca || 'S/N').toUpperCase(),
         tipo: (r.tipo || 'PRODUCTO').toUpperCase(),
         categoria: (r.categoria || 'S/N').toUpperCase(),
@@ -244,8 +280,8 @@ export const excelService = {
       if (status === 'FALTANTE') statusCell.font = { color: { argb: 'FF991B1B' }, bold: true };
       else if (status === 'SOBRANTE') statusCell.font = { color: { argb: 'FF065F46' }, bold: true };
       
-      row.getCell(6).numFmt = '"S/ " #,##0.00';
-      row.getCell(10).numFmt = '"S/ " #,##0.00;[Red]"-S/ " #,##0.00';
+      row.getCell(8).numFmt = '"S/ " #,##0.00';
+      row.getCell(12).numFmt = '"S/ " #,##0.00;[Red]"-S/ " #,##0.00';
     });
 
     return workbook;
