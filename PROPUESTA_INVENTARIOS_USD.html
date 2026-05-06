@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta Comercial SaaS - NoCodeCreator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- AOS for Animations -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563EB;
+            --primary-soft: #EFF6FF;
+            --secondary: #1E293B;
+            --bg-light: #F8FAFC;
+            --bg-white: #FFFFFF;
+            --text-main: #1E293B;
+            --text-dim: #64748B;
+            --success: #10B981;
+            --border: #E2E8F0;
+            --accent: #F59E0B;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 40px 20px; }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 40px;
+        }
+
+        .brand {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            letter-spacing: -1px;
+        }
+
+        .hero { text-align: center; padding: 40px 0 60px; }
+
+        .badge {
+            display: inline-block;
+            padding: 8px 16px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            border-radius: 100px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 4.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            color: var(--secondary);
+            letter-spacing: -2px;
+        }
+
+        h1 span { color: var(--primary); }
+
+        /* PRODUCT SECTION */
+        .product-brief {
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 60px;
+            margin-bottom: 80px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.03);
+        }
+
+        .product-brief h2 { font-family: 'Outfit'; font-size: 2.5rem; margin-bottom: 20px; color: var(--secondary); }
+        .product-brief p.intro { font-size: 1.2rem; color: var(--text-dim); margin-bottom: 40px; }
+
+        .modules-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
+        .module-item {
+            padding: 30px;
+            background: var(--bg-white);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .module-item:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+        }
+
+        .module-item h4 { font-family: 'Outfit'; font-size: 1.25rem; margin-bottom: 12px; color: var(--secondary); display: flex; align-items: center; gap: 10px; }
+        .module-item p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.5; }
+
+        /* VISUAL TOUR SECTION */
+        .visual-tour {
+            margin-bottom: 100px;
+        }
+
+        .visual-tour h2 {
+            font-family: 'Outfit';
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--secondary);
+        }
+
+        .screenshot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+        }
+
+        .screenshot-card {
+            background: var(--bg-white);
+            border-radius: 30px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .screenshot-card:hover { transform: scale(1.02); }
+
+        .screenshot-img {
+            width: 100%;
+            aspect-ratio: 16/10;
+            background: #F1F5F9; /* Placeholder color */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            font-size: 0.9rem;
+            position: relative;
+        }
+
+        .screenshot-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .screenshot-info {
+            padding: 25px;
+            background: var(--bg-white);
+        }
+
+        .screenshot-info h4 { font-family: 'Outfit'; margin-bottom: 8px; color: var(--secondary); }
+        .screenshot-info p { font-size: 0.85rem; color: var(--text-dim); }
+
+        /* COMPARISON TABLE */
+        .comparison-section { margin-bottom: 100px; }
+        .comparison-section h2 { font-family: 'Outfit'; font-size: 2.5rem; text-align: center; margin-bottom: 40px; color: var(--secondary); }
+        
+        .comp-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--bg-white);
+            border-radius: 30px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+
+        .comp-table th {
+            padding: 25px;
+            background: #F8FAFC;
+            text-align: left;
+            font-family: 'Outfit';
+            font-size: 1.1rem;
+            color: var(--secondary);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comp-table td {
+            padding: 20px 25px;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .comp-table tr:last-child td { border-bottom: none; }
+        .comp-table .check { color: var(--success); font-weight: bold; }
+        .comp-table .cross { color: #EF4444; font-weight: bold; }
+        .comp-table .highlight { background: var(--primary-soft); font-weight: 600; color: var(--primary); }
+
+        /* Pricing SaaS */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .pricing-card {
+            background: var(--bg-white);
+            border: 2px solid var(--border);
+            padding: 60px 40px;
+            border-radius: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .pricing-card.featured {
+            border-color: var(--primary);
+            background: var(--secondary);
+            color: var(--bg-white);
+            transform: scale(1.05);
+            box-shadow: 0 30px 60px -15px rgba(30, 41, 59, 0.3);
+        }
+
+        .price-label { font-weight: 700; text-transform: uppercase; letter-spacing: 2px; font-size: 0.75rem; margin-bottom: 20px; display: block; opacity: 0.8; }
+        .price-value { font-family: 'Outfit', sans-serif; font-size: 4rem; font-weight: 800; margin-bottom: 10px; }
+        .price-value span { font-size: 1.5rem; opacity: 0.6; }
+
+        .features-list { list-style: none; margin: 30px 0; text-align: left; }
+        .features-list li { margin-bottom: 12px; font-size: 0.95rem; display: flex; align-items: flex-start; gap: 10px; }
+        .features-list li::before { content: '✓'; color: var(--success); font-weight: bold; margin-top: 2px; }
+
+        /* Terminos */
+        .terms-box {
+            background: #F1F5F9;
+            padding: 30px;
+            border-radius: 24px;
+            margin-bottom: 100px;
+            font-size: 0.9rem;
+            color: var(--text-dim);
+            border: 1px dashed #CBD5E1;
+        }
+
+        .terms-box h4 { color: var(--secondary); margin-bottom: 15px; font-family: 'Outfit'; }
+        .terms-box ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+
+        .cta {
+            display: inline-block;
+            width: 100%;
+            padding: 20px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            transition: all 0.3s ease;
+        }
+
+        .cta.white { background: white; color: var(--secondary); }
+
+        footer { text-align: center; padding: 80px 0; color: var(--text-dim); }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8rem; }
+            .pricing-card.featured { transform: scale(1); }
+            .terms-box ul { grid-template-columns: 1fr; }
+            .product-brief { padding: 30px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <nav data-aos="fade-down">
+            <div class="brand">NoCodeCreator<span style="color: var(--accent);">.</span></div>
+            <div style="font-weight: 600; color: var(--text-dim);">Propuesta de Valor v3.2</div>
+        </nav>
+
+        <section class="hero">
+            <div class="badge" data-aos="fade-up">Plataforma de Inventarios v3.0</div>
+            <h1 data-aos="fade-up" data-aos-delay="100">Control Sin <span>Fricción</span>.</h1>
+            <p data-aos="fade-up" data-aos-delay="200">Una infraestructura digital robusta diseñada para transformar el caos operativo en inteligencia de datos.</p>
+        </section>
+
+        <!-- PRODUCT DESCRIPTION SECTION -->
+        <section class="product-brief" data-aos="fade-up">
+            <h2 style="color: var(--primary); margin-bottom: 10px;">Ecosistema Digital</h2>
+            <p class="intro">Arquitectura moderna diseñada para centralizar toda su operación en una sola fuente de verdad, eliminando errores manuales.</p>
+            
+            <div class="modules-grid">
+                <div class="module-item">
+                    <h4>📊 Dashboard</h4>
+                    <p>KPIs críticos y estados por tienda actualizados al instante para decisiones rápidas.</p>
+                </div>
+                <div class="module-item">
+                    <h4>📦 Maestros</h4>
+                    <p>Control total sobre el catálogo de artículos, marcas y costos unitarios dinámicos.</p>
+                </div>
+                <div class="module-item">
+                    <h4>🔄 Conciliación</h4>
+                    <p>Ajuste automático entre el stock físico y el sistema con impacto económico instantáneo.</p>
+                </div>
+                <div class="module-item">
+                    <h4>📸 Evidencias</h4>
+                    <p>Respaldo visual mediante fotografías asociadas a cada observación del inventario.</p>
+                </div>
+                <div class="module-item">
+                    <h4>🔐 RBAC</h4>
+                    <p>Seguridad de nivel corporativo con acceso restringido por roles (Admin/Supervisor/Operario).</p>
+                </div>
+                <div class="module-item">
+                    <h4>📱 Scan Móvil</h4>
+                    <p>Optimizado para terminales láser o cámara, permitiendo conteos ágiles sin papeles.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- VISUAL TOUR SECTION -->
+        <section class="visual-tour">
+            <h2 data-aos="fade-up">Experiencia de Usuario <span style="color: var(--primary);">Premium</span></h2>
+            
+            <div class="screenshot-grid">
+                <!-- DASHBOARD -->
+                <div class="screenshot-card" data-aos="fade-up">
+                    <div class="screenshot-img">
+                        <img src="https://drive.google.com/uc?id=1EqtwRX-sBYNKHDi6ZVYvb2yJPD0OS19f" alt="Dashboard" onerror="this.parentElement.innerHTML='<p style=\'padding:20px;text-align:center\'>Error al cargar Dashboard desde Drive</p>'">
+                    </div>
+                    <div class="screenshot-info">
+                        <h4>Panel de Control Administrativo</h4>
+                        <p>Visión 360° de la operación, KPIs y avance en tiempo real.</p>
+                    </div>
+                </div>
+
+                <!-- CONCILIACION -->
+                <div class="screenshot-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="screenshot-img">
+                        <img src="https://drive.google.com/uc?id=1P1N6m547X2J7UmGgkc4L8zq_7DaBn5xH" alt="Sesiones" onerror="this.parentElement.innerHTML='<p style=\'padding:20px;text-align:center\'>Error al cargar Sesiones desde Drive</p>'">
+                    </div>
+                    <div class="screenshot-info">
+                        <h4>Programación de Inventarios</h4>
+                        <p>Gestión multi-tienda y control de estados de inventario.</p>
+                    </div>
+                </div>
+
+                <!-- SCANNER -->
+                <div class="screenshot-card" data-aos="fade-up">
+                    <div class="screenshot-img">
+                        <img src="https://drive.google.com/uc?id=11Aod8lLEozxt9UFjkPAhb5nXTjnGn1r2" alt="Login" onerror="this.parentElement.innerHTML='<p style=\'padding:20px;text-align:center\'>Error al cargar Login desde Drive</p>'">
+                    </div>
+                    <div class="screenshot-info">
+                        <h4>Acceso e Identidad</h4>
+                        <p>Seguridad RBAC personalizada bajo la marca NoCodeCreator.</p>
+                    </div>
+                </div>
+
+                <!-- MASTER -->
+                <div class="screenshot-card" data-aos="fade-up" data-aos-delay="100">
+                    <div class="screenshot-img">
+                        <img src="https://drive.google.com/uc?id=1SiaUTUVLyOWOPP6WNxMTl-Aun-aDYugu" alt="Maestro" onerror="this.parentElement.innerHTML='<p style=\'padding:20px;text-align:center\'>Error al cargar Maestro desde Drive</p>'">
+                    </div>
+                    <div class="screenshot-info">
+                        <h4>Maestro de Artículos</h4>
+                        <p>Administración dinámica de SKUs, precios y existencias.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMPARISON SECTION -->
+        <section class="comparison-section" data-aos="fade-up">
+            <h2>Diferenciación <span style="color: var(--primary);">Estratégica</span></h2>
+            <table class="comp-table">
+                <thead>
+                    <tr>
+                        <th>Característica</th>
+                        <th>AppSheet (Anterior)</th>
+                        <th class="highlight">Individual Solution (v3.0)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Velocidad de Escaneo</td>
+                        <td>Limitada (Cámara)</td>
+                        <td class="highlight">Ultra-rápida (Láser/Cámara)</td>
+                    </tr>
+                    <tr>
+                        <td>Soporte Offline Real</td>
+                        <td><span class="cross">✕</span> Inestable</td>
+                        <td class="highlight"><span class="check">✓</span> Garantizado</td>
+                    </tr>
+                    <tr>
+                        <td>Conciliación de Costos</td>
+                        <td>Manual / Excel</td>
+                        <td class="highlight"><span class="check">✓</span> Automatizada</td>
+                    </tr>
+                    <tr>
+                        <td>Interfaz de Usuario</td>
+                        <td>Genérica</td>
+                        <td class="highlight">Personalizada / Premium</td>
+                    </tr>
+                    <tr>
+                        <td>Mantenimiento Incluido</td>
+                        <td><span class="cross">✕</span> No</td>
+                        <td class="highlight"><span class="check">✓</span> 5 Horas Mensuales</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="pricing-grid">
+            <!-- SETUP CARD -->
+            <div class="pricing-card" data-aos="fade-right">
+                <span class="price-label">Implementación Inicial</span>
+                <div class="price-value">$200<span>.00</span></div>
+                <ul class="features-list">
+                    <li>Despliegue de Base de Datos Segura</li>
+                    <li>Sincronización de Stock de Apertura</li>
+                    <li>Capacitación de Equipos de Campo</li>
+                    <li>Configuración de Dispositivos Móviles</li>
+                    <li>Soporte de Salida a Producción</li>
+                </ul>
+            </div>
+
+            <!-- SUBSCRIPTION CARD -->
+            <div class="pricing-card featured" data-aos="fade-left">
+                <span class="price-label">Membresía Profesional</span>
+                <div class="price-value" style="color: var(--accent);">$50<span>.00 /mes</span></div>
+                <ul class="features-list" style="color: #CBD5E1;">
+                    <li>Acceso a todos los Módulos v3.0</li>
+                    <li>Infraestructura en Nube incluida</li>
+                    <li><b>5 Horas de Soporte/Mantenimiento</b></li>
+                    <li>Backup y Protección de Datos</li>
+                    <li>Actualizaciones de Estabilidad</li>
+                    <li>Usuarios y Tiendas Ilimitadas</li>
+                </ul>
+                <a href="#" class="cta white">Iniciar suscripción</a>
+            </div>
+        </section>
+
+        <section class="terms-box" data-aos="fade-up">
+            <h4>Políticas de Servicio (SLA)</h4>
+            <ul>
+                <li>🚀 <b>Evolución del Producto:</b> Nuevos módulos o reportes personalizados se cotizan por separado.</li>
+                <li>⏰ <b>Control de Soporte:</b> Horas excedentes a las 5 mensuales: $25.00 USD / hora técnica.</li>
+                <li>🌙 <b>Gestión de Horarios:</b> Mantenimiento preventivo gestionado en horarios no intrusivos.</li>
+                <li>📑 <b>Propiedad Intelectual:</b> El cliente posee el 100% de los datos generados por su operación.</li>
+            </ul>
+        </section>
+
+        <footer data-aos="fade-up">
+            <div class="brand" style="margin-bottom: 10px;">NoCodeCreator<span style="color: var(--accent);">.</span></div>
+            <p>Precisión. Control. Escalabilidad.</p>
+            <p style="font-size: 0.8rem; margin-top: 10px;">Lima, Abril 2026</p>
+        </footer>
+    </div>
+
+    <!-- AOS JS -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({ duration: 1000, once: true });
+    </script>
+</body>
+</html>

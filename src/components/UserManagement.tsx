@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
+import { supabaseAdmin } from '../lib/supabaseAdmin';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Users, 
@@ -44,6 +45,11 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
     rol: 'operario' as UserRole,
     pin_seguridad: ''
   });
+
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [selectedUserForPassword, setSelectedUserForPassword] = useState<Perfil | null>(null);
+  const [newPassword, setNewPassword] = useState('');
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
 
   const roles: UserRole[] = ['administrador', 'supervisor', 'operario'];
 
@@ -150,6 +156,30 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
     } else {
       setEditingId(null);
       fetchPerfiles();
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedUserForPassword || !newPassword) return;
+
+    setIsUpdatingPassword(true);
+    try {
+      const { error } = await supabaseAdmin.auth.admin.updateUserById(
+        selectedUserForPassword.id,
+        { password: newPassword }
+      );
+
+      if (error) throw error;
+
+      alert('Contraseña actualizada con éxito');
+      setIsPasswordModalOpen(false);
+      setNewPassword('');
+      setSelectedUserForPassword(null);
+    } catch (err: any) {
+      alert('Error al cambiar contraseña: ' + err.message);
+    } finally {
+      setIsUpdatingPassword(false);
     }
   };
 
@@ -293,6 +323,16 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
                       {perfil.rol}
                     </span>
                     <button 
+                      onClick={() => {
+                        setSelectedUserForPassword(perfil);
+                        setIsPasswordModalOpen(true);
+                      }}
+                      className="p-3 bg-gray-50 text-gray-400 rounded-xl hover:text-amber-500 hover:bg-amber-50 transition-all"
+                      title="Cambiar Contraseña"
+                    >
+                      <Key size={18} />
+                    </button>
+                    <button 
                       onClick={() => handleEdit(perfil)}
                       className="p-3 bg-gray-50 text-gray-400 rounded-xl hover:text-primary hover:bg-primary/5 transition-all"
                     >
@@ -420,6 +460,71 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
               >
                 {isCreating ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
                 {isCreating ? 'Procesando identidades...' : 'Confirmar Usuario'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Changing Password */}
+      {isPasswordModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" 
+            onClick={() => !isUpdatingPassword && setIsPasswordModalOpen(false)}
+          />
+          <div className="bg-white rounded-[32px] shadow-2xl w-full max-w-md relative z-10 overflow-hidden animate-in zoom-in-95 duration-300">
+            <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-amber-500/10 rounded-xl">
+                  <Key className="text-amber-600" size={20} />
+                </div>
+                <div className="space-y-0.5">
+                  <h3 className="text-xl font-display font-black tracking-tight text-gray-800">Actualizar Acceso</h3>
+                  <p className="text-xs text-gray-400 font-medium">{selectedUserForPassword?.email}</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setIsPasswordModalOpen(false)}
+                className="p-2 bg-gray-100 text-gray-400 rounded-full hover:bg-gray-200 hover:text-gray-600 transition-colors"
+                disabled={isUpdatingPassword}
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <form onSubmit={handlePasswordChange} className="p-8 space-y-6">
+              <div className="space-y-1.5">
+                <label className="text-[10px] uppercase font-bold text-gray-400 ml-1 tracking-widest">Nueva Contraseña</label>
+                <div className="relative">
+                  <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                  <input 
+                    type="password" 
+                    required
+                    minLength={6}
+                    className="w-full bg-gray-50 border border-gray-200 rounded-2xl py-3.5 pl-11 pr-4 text-gray-800 outline-none focus:border-primary/50 focus:ring-4 focus:ring-primary/5 transition-all text-sm font-medium placeholder:text-gray-300"
+                    placeholder="Mínimo 6 caracteres"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex items-start gap-3 text-amber-700">
+                <AlertCircle size={20} className="shrink-0 mt-0.5" />
+                <p className="text-xs font-medium leading-relaxed">
+                  Esta acción cambiará inmediatamente el acceso para el usuario. Asegúrate de comunicarle la nueva contraseña.
+                </p>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={isUpdatingPassword || !newPassword}
+                className="w-full py-4 rounded-2xl font-bold flex items-center justify-center gap-3 mt-4 text-white bg-amber-600 shadow-xl shadow-amber-600/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:pointer-events-none"
+              >
+                {isUpdatingPassword ? <Loader2 className="animate-spin" size={20} /> : <Check size={20} />}
+                {isUpdatingPassword ? 'Actualizando...' : 'Cambiar Contraseña'}
               </button>
             </form>
           </div>
