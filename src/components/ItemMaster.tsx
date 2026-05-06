@@ -83,10 +83,18 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
 
         if (records.length === 0) throw new Error('Formato inválido: no se encontraron filas con SKU y Nombre');
 
-        const { error: insertError } = await supabase.from('articulos').upsert(records, { onConflict: 'sku' });
+        // Deduplicate records by SKU to avoid PostgreSQL error "ON CONFLICT DO UPDATE command cannot affect row a second time"
+        const uniqueRecords = Object.values(
+          records.reduce((acc: any, record: any) => {
+            acc[record.sku] = record;
+            return acc;
+          }, {})
+        );
+
+        const { error: insertError } = await supabase.from('articulos').upsert(uniqueRecords, { onConflict: 'sku' });
         if (insertError) throw new Error(insertError.message);
 
-        alert(`Se importaron ${records.length} artículos correctamente`);
+        alert(`Se importaron ${uniqueRecords.length} artículos correctamente`);
         fetchArticulos();
         if (fileInputRef.current) fileInputRef.current.value = '';
       } catch (err: any) {
