@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import * as XLSX from 'xlsx';
 import { supabase } from '../lib/supabase';
 import type { Articulo } from '../types';
 import { Search, Plus, Filter, MoreVertical, Package, ArrowLeft, Trash2, Edit2, Upload, Loader2, FileSpreadsheet } from 'lucide-react';
@@ -41,25 +42,46 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
     const reader = new FileReader();
     reader.onload = async (e) => {
       try {
-        const text = e.target?.result as string;
-        const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
         
-        let startIndex = 0;
-        if (lines[0].toLowerCase().includes('sku')) startIndex = 1;
+        // Convert to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-        const records = lines.slice(startIndex).map(line => {
-          const p = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-          const sku = p[0]?.replace(/^"|"$/g, '').trim();
-          const nombre = p[1]?.replace(/^"|"$/g, '').trim();
-          const categoria = p[2]?.replace(/^"|"$/g, '').trim() || '';
-          const marca = p[3]?.replace(/^"|"$/g, '').trim() || '';
-          const tipo = p[4]?.replace(/^"|"$/g, '').trim() || 'PRODUCTO';
-          const costo_unitario = parseFloat(p[5]?.replace(/^"|"$/g, '').trim()) || 0;
-          if (!sku || !nombre) throw new Error('Formato inválido: falta SKU o nombre');
-          return { sku, nombre, categoria, marca, tipo, costo_unitario, stock_sistema: 0 };
-        });
+        if (jsonData.length === 0) throw new Error('Archivo vacío o sin datos válidos');
 
-        if (records.length === 0) throw new Error('Archivo vacío');
+        const records = jsonData.map((row: any) => {
+          // Normalize keys to lowercase and trim to handle different cases/spaces
+          const normalizedRow: any = {};
+          Object.keys(row).forEach(key => {
+            normalizedRow[key.toLowerCase().trim()] = row[key];
+          });
+
+          const sku = String(normalizedRow.sku || '').trim();
+          const nombre = String(normalizedRow.nombre || '').trim();
+          const categoria = String(normalizedRow.categoria || normalizedRow.categoría || '').trim();
+          const marca = String(normalizedRow.marca || '').trim();
+          const tipo = String(normalizedRow.tipo || '').trim() || 'PRODUCTO';
+          const costo_unitario = parseFloat(String(normalizedRow.costo_unitario || normalizedRow.costo || '0').replace(/[^\d.-]/g, '')) || 0;
+
+          if (!sku || !nombre) {
+             return null;
+          }
+
+          return { 
+            sku, 
+            nombre, 
+            categoria, 
+            marca, 
+            tipo, 
+            costo_unitario, 
+            stock_sistema: 0 
+          };
+        }).filter(Boolean);
+
+        if (records.length === 0) throw new Error('Formato inválido: no se encontraron filas con SKU y Nombre');
 
         const { error: insertError } = await supabase.from('articulos').upsert(records, { onConflict: 'sku' });
         if (insertError) throw new Error(insertError.message);
@@ -74,7 +96,7 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
       }
     };
     reader.onerror = () => { alert('Error al leer el archivo'); setImportLoading(false); };
-    reader.readAsText(file);
+    reader.readAsArrayBuffer(file);
   };
 
   useEffect(() => {
@@ -144,7 +166,7 @@ export const ItemMaster: React.FC<ItemMasterProps> = ({ onBack }) => {
            
            <input 
              type="file" 
-             accept=".csv"
+             accept=".csv,.xlsx,.xls"
              onChange={handleFileUpload}
              ref={fileInputRef}
              className="hidden"
