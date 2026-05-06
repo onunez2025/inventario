@@ -28,6 +28,7 @@ const App: React.FC = () => {
   const [perfil, setPerfil] = useState<Perfil | null>(null);
   const [loading, setLoading] = useState(true);
   const [permisos, setPermisos] = useState<PermissionKey[]>([]);
+  const [isRecovering, setIsRecovering] = useState(false);
 
   const [activeInventory, setActiveInventory] = useState<Inventario | null>(() => {
     const saved = localStorage.getItem('activeInventory');
@@ -100,12 +101,19 @@ const App: React.FC = () => {
       else setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
-      if (session) fetchPerfil(session.user.id);
-      else {
+      
+      if (event === 'PASSWORD_RECOVERY') {
+        setIsRecovering(true);
+      }
+
+      if (session) {
+        fetchPerfil(session.user.id);
+      } else {
         setPerfil(null);
         setLoading(false);
+        setIsRecovering(false);
       }
     });
 
@@ -211,6 +219,15 @@ const App: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center bg-surface">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
+    );
+  }
+
+  if (isRecovering) {
+    return (
+      <LoginPage 
+        initialView="update-password" 
+        onComplete={() => setIsRecovering(false)} 
+      />
     );
   }
 

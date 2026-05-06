@@ -2,12 +2,18 @@ import React, { useState } from 'react';
 import { supabase } from '../lib/supabase';
 import { Mail, Lock, LogIn, AlertCircle, Key, ArrowLeft, Loader2 } from 'lucide-react';
 
-export const LoginPage: React.FC = () => {
+interface LoginPageProps {
+  initialView?: 'login' | 'recovery' | 'update-password';
+  onComplete?: () => void;
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ initialView = 'login', onComplete }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [view, setView] = useState<'login' | 'recovery'>('login');
+  const [view, setView] = useState<'login' | 'recovery' | 'update-password'>(initialView);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -42,7 +48,30 @@ export const LoginPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };  return (
+  };
+
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    setSuccessMessage(null);
+
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      setSuccessMessage('Contraseña actualizada con éxito. Ya puedes usar tu nueva contraseña.');
+      setTimeout(() => {
+        if (onComplete) onComplete();
+        setView('login');
+      }, 3000);
+    } catch (err: any) {
+      setError(err.message || 'Error al actualizar la contraseña');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
     <div className="min-h-screen flex items-center justify-center p-6 relative overflow-hidden font-sans">
       {/* Background Image with Overlay */}
       <div 
@@ -86,7 +115,7 @@ export const LoginPage: React.FC = () => {
             </div>
           )}
 
-          {view === 'login' ? (
+          {view === 'login' && (
             <form onSubmit={handleLogin} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[11px] uppercase font-black text-on-surface/70 ml-1 tracking-widest">Correo Electrónico</label>
@@ -136,7 +165,9 @@ export const LoginPage: React.FC = () => {
                 {loading ? 'Iniciando Sesión...' : 'Entrar al Sistema'}
               </button>
             </form>
-          ) : (
+          )}
+
+          {view === 'recovery' && (
             <form onSubmit={handleRecovery} className="space-y-6">
               <div className="space-y-2">
                 <label className="text-[11px] uppercase font-black text-on-surface/70 ml-1 tracking-widest">Correo de Recuperación</label>
@@ -169,6 +200,45 @@ export const LoginPage: React.FC = () => {
               >
                 <ArrowLeft size={16} /> Volver al inicio
               </button>
+            </form>
+          )}
+
+          {view === 'update-password' && (
+            <form onSubmit={handleUpdatePassword} className="space-y-6">
+              <div className="space-y-2">
+                <label className="text-[11px] uppercase font-black text-on-surface/70 ml-1 tracking-widest">Nueva Contraseña</label>
+                <div className="relative group">
+                  <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface/40 group-focus-within:text-primary transition-colors" size={20} />
+                  <input 
+                    type="password" 
+                    required
+                    minLength={6}
+                    className="w-full pl-12 pr-4 py-4 bg-surface-container-low border-2 border-transparent focus:border-primary/20 focus:bg-white rounded-2xl focus:outline-none transition-all shadow-sm"
+                    placeholder="Mínimo 6 caracteres"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="btn-premium w-full py-5 rounded-[1.5rem] flex items-center justify-center gap-3 mt-8 text-lg font-black tracking-tight"
+              >
+                {loading ? <Loader2 className="animate-spin" size={24} /> : <Key size={24} />}
+                {loading ? 'Actualizando...' : 'Actualizar Contraseña'}
+              </button>
+
+              {!onComplete && (
+                <button 
+                  type="button" 
+                  onClick={() => setView('login')}
+                  className="w-full text-xs font-black text-on-surface/60 flex items-center justify-center gap-2 hover:text-primary transition-all uppercase tracking-widest"
+                >
+                  <ArrowLeft size={16} /> Volver al inicio
+                </button>
+              )}
             </form>
           )}
         </div>
