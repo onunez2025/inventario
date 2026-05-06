@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, supabaseUrl, supabaseAnonKey } from '../lib/supabase';
-import { supabaseAdmin } from '../lib/supabaseAdmin';
+import { getSupabaseAdmin } from '../lib/supabaseAdmin';
 import { createClient } from '@supabase/supabase-js';
 import { 
   Users, 
@@ -165,7 +165,12 @@ export const UserManagement: React.FC<UserManagementProps> = ({ canManageRBAC = 
 
     setIsUpdatingPassword(true);
     try {
-      const { error } = await supabaseAdmin.auth.admin.updateUserById(
+      const adminClient = getSupabaseAdmin();
+      if (!adminClient) {
+        throw new Error('El cliente administrativo no está configurado. Contacte al soporte.');
+      }
+
+      const { error } = await adminClient.auth.admin.updateUserById(
         selectedUserForPassword.id,
         { password: newPassword }
       );
